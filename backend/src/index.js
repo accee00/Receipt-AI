@@ -4,7 +4,7 @@ import { app } from "./app.js";
 
 dotenv.config({
     path: "./.env"
-})
+});
 
 connectDb().then(() => {
     app.on("error", () => {
@@ -15,5 +15,5 @@ connectDb().then(() => {
         console.log(`Server running at http://localhost:${process.env.PORT}`);
     });
 }).catch((error) => {
-    console.log(error)
+    console.log(error);
 });
