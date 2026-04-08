@@ -29,4 +29,14 @@ app.use((err, req, res, next) => {
         error: "Something went wrong"
     });
 });
+
+///API Routes
+import userRouter from "./routes/user.routes.js";
+app.use("/", (req, res) => {
+    res.status(200).json({
+        message: "Welcome to the Recept AI API",
+    });
+});
+
+app.use("/api/v1/users", userRouter);
 export { app };
