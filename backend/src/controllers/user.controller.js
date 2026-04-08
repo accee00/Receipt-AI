@@ -52,7 +52,7 @@ const getCurrentUser = async (req, res) => {
     return res.status(200).json({
         message: "User fetched successfully",
         data: req.user,
-    })
-}
+    });
+};
 
 export { registerUser, loginUser, getCurrentUser };
