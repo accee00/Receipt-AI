@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
-const verifyToken = async (req, _, next) => {
+const verifyToken = async (req, res, next) => {
     try {
-        const token = req.headers["Authorization"];
+        const token = req.header("Authorization");
         if (!token) {
             return res.status(401).json({ message: "Unauthorized" });
         }
         const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
-        const user = User.findById(decodedToken._id).select("-password");
+        const user = await User.findById(decodedToken._id).select("-password");
         if (!user) {
             return res.status(401).json({ message: "Expired or malfunctioned token." });
         }

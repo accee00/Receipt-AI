@@ -15,6 +15,17 @@ app.use((req, res, next) => {
     });
     next();
 });
+
+///API Routes
+import userRouter from "./routes/user.routes.js";
+app.route("/").get((req, res) => {
+    res.status(200).json({
+        message: "Welcome to the Recept AI API",
+    });
+});
+
+app.use("/api/v1/users", userRouter);
+
 /// Error logger
 app.use((err, req, res, next) => {
     console.error({
@@ -30,13 +41,4 @@ app.use((err, req, res, next) => {
     });
 });
 
-///API Routes
-import userRouter from "./routes/user.routes.js";
-app.use("/", (req, res) => {
-    res.status(200).json({
-        message: "Welcome to the Recept AI API",
-    });
-});
-
-app.use("/api/v1/users", userRouter);
 export { app };

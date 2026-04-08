@@ -24,13 +24,10 @@ const userSchema = new Schema(
     { timestamps: true, });
 
 /// Hooks
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
 
-userSchema.pre("save", function (next) {
-    if (!this.isModified("password")) {
-        next();
-    }
-    this.password = bcrypt.hash(this.password);
-    next();
+    this.password = await bcrypt.hash(this.password, 10);
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {
