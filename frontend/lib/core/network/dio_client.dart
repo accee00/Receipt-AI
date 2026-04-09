@@ -1,19 +1,35 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/core/utils/api_response.dart';
+import 'package:frontend/core/utils/failure.dart';
 
 class DioClient {
+  static final DioClient _instance = DioClient._internal();
+
+  factory DioClient() {
+    return _instance;
+  }
+
   late final Dio _dio;
 
-  DioClient()
-    : _dio = Dio(
-        BaseOptions(
-          baseUrl: "https://localhost:8000/api/v1",
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          connectTimeout: Duration(seconds: 10),
-          receiveTimeout: Duration(seconds: 10),
-          sendTimeout: Duration(seconds: 10),
-        ),
-      );
+  DioClient._internal() {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: "https://localhost:8000/api/v1",
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 10),
+      ),
+    );
+  }
+
+  Failure _handleDioError(DioException e) {
+    String errorMessage = e.message ?? 'An unknown error occurred';
+    if (e.response?.data is Map<String, dynamic>) {
+      errorMessage = e.response!.data['error'] ?? errorMessage;
+    }
+    return Failure(errorMessage, statusCode: e.response?.statusCode);
+  }
 
   Future<ApiResponse<T>> get<T>(
     String url, {
@@ -23,19 +39,16 @@ class DioClient {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>(
+      final response = await _dio.get<dynamic>(
         url,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
         options: options,
         onReceiveProgress: onReceiveProgress,
       );
-      return ApiResponse<T>.fromJson(response.data!);
+      return ApiResponse<T>.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw ApiResponse.error(
-        message: e.message ?? 'An error occurred',
-        statusCode: e.response?.statusCode,
-      );
+      throw _handleDioError(e);
     }
   }
 
@@ -48,7 +61,7 @@ class DioClient {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      final response = await _dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<dynamic>(
         url,
         data: data,
         queryParameters: queryParameters,
@@ -56,12 +69,9 @@ class DioClient {
         options: options,
         onReceiveProgress: onReceiveProgress,
       );
-      return ApiResponse<T>.fromJson(response.data!);
+      return ApiResponse<T>.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw ApiResponse.error(
-        message: e.message ?? 'An error occurred',
-        statusCode: e.response?.statusCode,
-      );
+      throw _handleDioError(e);
     }
   }
 
@@ -74,7 +84,7 @@ class DioClient {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      final response = await _dio.put<Map<String, dynamic>>(
+      final response = await _dio.put<dynamic>(
         url,
         data: data,
         queryParameters: queryParameters,
@@ -82,12 +92,9 @@ class DioClient {
         options: options,
         onReceiveProgress: onReceiveProgress,
       );
-      return ApiResponse<T>.fromJson(response.data!);
+      return ApiResponse<T>.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw ApiResponse.error(
-        message: e.message ?? 'An error occurred',
-        statusCode: e.response?.statusCode,
-      );
+      throw _handleDioError(e);
     }
   }
 
@@ -99,19 +106,16 @@ class DioClient {
     CancelToken? cancelToken,
   }) async {
     try {
-      final response = await _dio.delete<Map<String, dynamic>>(
+      final response = await _dio.delete<dynamic>(
         url,
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
         options: options,
       );
-      return ApiResponse<T>.fromJson(response.data!);
+      return ApiResponse<T>.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw ApiResponse.error(
-        message: e.message ?? 'An error occurred',
-        statusCode: e.response?.statusCode,
-      );
+      throw _handleDioError(e);
     }
   }
 
@@ -131,7 +135,7 @@ class DioClient {
         onReceiveProgress: onReceiveProgress,
       );
     } on DioException catch (e) {
-      throw Exception('Failed to download file: ${e.message}');
+      throw _handleDioError(e);
     }
   }
 }

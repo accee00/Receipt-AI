@@ -2,7 +2,6 @@ class UserModel {
   final String id;
   final String name;
   final String email;
-  final String password;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -10,7 +9,6 @@ class UserModel {
     required this.id,
     required this.name,
     required this.email,
-    required this.password,
     this.createdAt,
     this.updatedAt,
   });
@@ -20,7 +18,6 @@ class UserModel {
       id: json['_id'],
       name: json['name'],
       email: json['email'],
-      password: json['password'],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'].toString())
           : null,
@@ -35,7 +32,6 @@ class UserModel {
       '_id': id,
       'name': name,
       'email': email,
-      'password': password,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -45,7 +41,6 @@ class UserModel {
     String? id,
     String? name,
     String? email,
-    String? password,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -53,7 +48,6 @@ class UserModel {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
-      password: password ?? this.password,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -51,9 +51,10 @@ const loginUser = async (req, res) => {
         });
     }
     const token = user.generateToken();
+    const loggedInUser = await User.findById(user._id).select("-password")
     return res.status(200).json({
         message: "User logged in successfully",
-        data: user,
+        data: loggedInUser,
         token: token,
         isSuccess: true,
     });
