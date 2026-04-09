@@ -1,71 +1,101 @@
 import { User } from "../models/user.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/api.error.js";
+import { ApiResponse } from "../utils/api.response.js";
 
-const registerUser = async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body || {};
+
     if (!name?.trim() || !email?.trim() || !password?.trim()) {
-        return res.status(400).json({
-            error: "All fields are required",
-            statusCode: 400,
-            isSuccess: false,
-        });
+        throw new ApiError({ statusCode: 400, message: "All fields are required" });
     }
-    const user = await User.create({
-        name, email, password,
-    }).select("-password");
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        throw new ApiError({ statusCode: 409, message: "User already exists" });
+    }
+
+    const user = await User.create({ name, email, password });
 
     const token = user.generateToken();
 
-    return res.status(201).json({
-        message: "User registered successfully",
-        data: user,
-        token: token,
-        isSuccess: true,
-    });
-};
+    const safeUser = user.toObject();
+    delete safeUser.password;
 
-const loginUser = async (req, res) => {
+    return res.status(201).json(
+        new ApiResponse({
+            statusCode: 201,
+            message: "User registered successfully",
+            data: { user: safeUser, token },
+        })
+    );
+});
+
+const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body || {};
 
     if (!email?.trim() || !password?.trim()) {
-        return res.status(400).json({
-            error: "All fields are required",
-            statusCode: 400,
-            isSuccess: false,
-        })
+        throw new ApiError({ statusCode: 400, message: "All fields are required" });
     }
+
     const user = await User.findOne({ email });
     if (!user) {
-        return res.status(404).json({
-            error: "User not found.",
-            statusCode: 404,
-            isSuccess: false,
-        });
+        throw new ApiError({ statusCode: 404, message: "User not found" });
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password);
     if (!isPasswordValid) {
-        return res.status(401).json({
-            error: "Invalid password.",
-            statusCode: 401,
-            isSuccess: false,
-        });
+        throw new ApiError({ statusCode: 401, message: "Invalid password" });
     }
+
     const token = user.generateToken();
-    const loggedInUser = await User.findById(user._id).select("-password")
-    return res.status(200).json({
-        message: "User logged in successfully",
-        data: loggedInUser,
-        token: token,
-        isSuccess: true,
-    });
-};
 
-const getCurrentUser = async (req, res) => {
-    return res.status(200).json({
-        message: "User fetched successfully",
-        data: req.user,
-        isSuccess: true,
-    });
-};
+    const safeUser = user.toObject();
+    delete safeUser.password;
 
-export { registerUser, loginUser, getCurrentUser };
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "User logged in successfully",
+            data: { user: safeUser, token },
+        })
+    );
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "User fetched successfully",
+            data: req.user,
+        })
+    );
+});
+
+const updateUserName = asyncHandler(async (req, res) => {
+    const { name } = req.body;
+
+    if (!name?.trim()) {
+        throw new ApiError({ statusCode: 400, message: "Name is required" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { name },
+        { new: true }
+    ).select("-password");
+
+    if (!user) {
+        throw new ApiError({ statusCode: 404, message: "User not found" });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "Name updated successfully",
+            data: user,
+        })
+    );
+});
+
+export { registerUser, loginUser, getCurrentUser, updateUserName };

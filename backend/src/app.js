@@ -1,4 +1,5 @@
 import express from "express";
+import { ApiError } from "./utils/api.error.js";
 
 const app = express();
 
@@ -26,18 +27,28 @@ app.route("/").get((req, res) => {
 
 app.use("/api/v1/users", userRouter);
 
-/// Error logger
+/// Error logger and response 
 app.use((err, req, res, next) => {
+
     console.error({
         timestamp: new Date().toISOString(),
-        message: err.message,
+        error: err.message,
         stack: err.stack,
         path: req.path,
         method: req.method,
     });
 
-    res.status(500).json({
-        error: "Something went wrong"
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode || 500).json({
+            isSuccess: err.success,
+            error: err.error,
+            statusCode: err.statusCode,
+        });
+    }
+
+    return res.status(500).json({
+        success: false,
+        message: err.message || "Internal Server Error",
     });
 });
 
