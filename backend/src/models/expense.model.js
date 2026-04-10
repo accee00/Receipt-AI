@@ -13,8 +13,14 @@ const expenseSchema = new Schema({
     },
     items: [
         {
-            type: Map,
-            of: String,
+            name: {
+                type: String,
+                required: true,
+            },
+            amount: {
+                type: Number,
+                required: true,
+            },
         }
     ],
     date: {

@@ -65,10 +65,9 @@ const addExpense = asyncHandler(async (req, res) => {
     }
 
 
-    const providedTotal = req.body.totalAmount;
+
     const totalAmount = items && items.length > 0
-        ? items.reduce((acc, item) => acc + (item.amount || item.price || 0), 0)
-        : providedTotal;
+        ? items.reduce((acc, item) => acc + (item.amount || item.price || 0), 0) : "00";
 
     const expense = await Expense.create({
         merchant,

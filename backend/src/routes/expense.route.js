@@ -11,11 +11,11 @@ import {
     getExpense,
     getExpenseByMonthOrCategory
 } from "../controllers/expense.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import verifyToken from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.use(verifyJWT);
+router.use(verifyToken);
 
 router.route("/dashboard").get(getDashboardData);
 router.route("/insights").get(getUserExpenseInsights);
