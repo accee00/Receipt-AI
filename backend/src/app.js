@@ -19,6 +19,8 @@ app.use((req, res, next) => {
 
 ///API Routes
 import userRouter from "./routes/user.routes.js";
+import expenseRouter from "./routes/expense.route.js";
+
 app.route("/").get((req, res) => {
     res.status(200).json({
         message: "Welcome to the Recept AI API",
@@ -26,6 +28,7 @@ app.route("/").get((req, res) => {
 });
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/expenses", expenseRouter);
 
 /// Error logger and response 
 app.use((err, req, res, next) => {
