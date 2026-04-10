@@ -25,8 +25,8 @@ class DioClient {
 
   Failure _handleDioError(DioException e) {
     String errorMessage = e.message ?? 'An unknown error occurred';
-    if (e.response?.data is Map<String, dynamic>) {
-      errorMessage = e.response!.data['error'] ?? errorMessage;
+    if (e.response?.data['message'] != null) {
+      errorMessage = e.response!.data['message'];
     }
     return Failure(errorMessage, statusCode: e.response?.statusCode);
   }

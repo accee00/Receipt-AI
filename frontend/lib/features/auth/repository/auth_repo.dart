@@ -23,10 +23,10 @@ class AuthRepo {
       if (!response.isSuccess) {
         return Left(Failure(response.message!));
       }
-      final user = UserModel.fromJson(response.data!);
+      final UserModel user = UserModel.fromJson(response.data!['user']);
 
-      if (response.token != null) {
-        await _secureStorage.setToken("token", response.token!);
+      if (response.data!['token'] != null) {
+        await _secureStorage.setToken("token", response.data!['token']);
       }
 
       return Right(user);
