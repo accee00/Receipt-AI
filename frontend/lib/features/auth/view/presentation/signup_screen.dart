@@ -2,18 +2,22 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
+import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
 import 'package:frontend/features/auth/view/widgets/circle_icon_button.dart';
 import 'package:frontend/features/auth/view/widgets/terms_checkbox.dart';
-class SignupScreen extends StatefulWidget {
+import 'package:frontend/features/auth/viewmodel/auth_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen>
+class _SignupScreenState extends ConsumerState<SignupScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
@@ -22,7 +26,6 @@ class _SignupScreenState extends State<SignupScreen>
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _acceptedTerms = false;
@@ -56,8 +59,9 @@ class _SignupScreenState extends State<SignupScreen>
     super.dispose();
   }
 
-  Future<void> _handleSignup() async {
+  void _handleSignup() {
     if (!_formKey.currentState!.validate()) return;
+
     if (!_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -68,26 +72,42 @@ class _SignupScreenState extends State<SignupScreen>
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Account created successfully!'),
-        backgroundColor: AppColors.success,
-      ),
-    );
-    Navigator.of(context).pop();
+    ref
+        .read(authViewModelProvider.notifier)
+        .signUpUser(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDark;
     final textTheme = context.textTheme;
+    final authState = ref.watch(authViewModelProvider);
+
+    ref.listen(authViewModelProvider, (previous, next) {
+      next.whenOrNull(
+        error: (error, _) {
+          showCustomSnackBar(
+            context: context,
+            message: error.toString(),
+            type: SnackBarType.failure,
+          );
+        },
+        data: (user) {
+          if (user != null && previous?.isLoading == true && !next.isLoading) {
+            showCustomSnackBar(
+              context: context,
+              message: 'Account created successfully!',
+              type: SnackBarType.success,
+            );
+            Navigator.of(context).pop();
+          }
+        },
+      );
+    });
 
     return Scaffold(
       body: Stack(
@@ -261,7 +281,7 @@ class _SignupScreenState extends State<SignupScreen>
 
                         AppGradientButton(
                           label: 'Create Account',
-                          isLoading: _isLoading,
+                          isLoading: authState.isLoading,
                           onPressed: _handleSignup,
                         ),
 
@@ -299,4 +319,3 @@ class _SignupScreenState extends State<SignupScreen>
     );
   }
 }
-

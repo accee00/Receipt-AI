@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/api.error.js";
 import { ApiResponse } from "../utils/api.response.js";
 
-const registerUser = asyncHandler(async (req, res) => {
+const signUpUser = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body || {};
 
     if (!name?.trim() || !email?.trim() || !password?.trim()) {
@@ -98,4 +98,4 @@ const updateUserName = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser, loginUser, getCurrentUser, updateUserName };
+export { signUpUser, loginUser, getCurrentUser, updateUserName };

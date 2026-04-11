@@ -43,8 +43,8 @@ app.use((err, req, res, next) => {
 
     if (err instanceof ApiError) {
         return res.status(err.statusCode || 500).json({
-            isSuccess: err.success,
-            error: err.error,
+            isSuccess: err.isSuccess,
+            message: err.message,
             statusCode: err.statusCode,
         });
     }

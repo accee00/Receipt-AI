@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/core/utils/api_response.dart';
 import 'package:frontend/core/utils/failure.dart';
+import 'package:frontend/core/utils/secure_storage.dart';
 
 class DioClient {
   static final DioClient _instance = DioClient._internal();
@@ -14,11 +15,23 @@ class DioClient {
   DioClient._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: "https://localhost:8000/api/v1",
+        baseUrl: "http://localhost:8000/api/v1/",
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         sendTimeout: const Duration(seconds: 10),
+      ),
+    );
+
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await SecureStorage().getToken("token");
+          if (token != null) {
+            options.headers['Authorization'] = token;
+          }
+          return handler.next(options);
+        },
       ),
     );
   }
@@ -40,7 +53,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.get<dynamic>(
-        "https://localhost:8000/api/v1$url",
+        url,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
         options: options,
@@ -62,7 +75,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.post<dynamic>(
-        "https://localhost:8000/api/v1$url",
+        url,
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
@@ -85,7 +98,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.put<dynamic>(
-        "https://localhost:8000/api/v1$url",
+        url,
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
@@ -107,7 +120,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.delete<dynamic>(
-        "https://localhost:8000/api/v1$url",
+        url,
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
