@@ -40,7 +40,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.get<dynamic>(
-        url,
+        "https://localhost:8000/api/v1$url",
         queryParameters: queryParameters,
         cancelToken: cancelToken,
         options: options,
@@ -62,7 +62,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.post<dynamic>(
-        url,
+        "https://localhost:8000/api/v1$url",
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
@@ -85,7 +85,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.put<dynamic>(
-        url,
+        "https://localhost:8000/api/v1$url",
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
@@ -107,7 +107,7 @@ class DioClient {
   }) async {
     try {
       final response = await _dio.delete<dynamic>(
-        url,
+        "https://localhost:8000/api/v1$url",
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
