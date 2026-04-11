@@ -226,4 +226,3 @@ class _OnboardScreenState extends State<OnboardScreen>
     );
   }
 }
-

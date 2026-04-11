@@ -1,27 +1,29 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
+import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
 import 'package:frontend/features/auth/view/presentation/signup_screen.dart';
 import 'package:frontend/features/auth/view/widgets/brand_header.dart';
 import 'package:frontend/features/auth/view/widgets/or_divider.dart';
+import 'package:frontend/features/auth/viewmodel/auth_view_model.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _LoginScreenState extends ConsumerState<LoginScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false;
   bool _obscurePassword = true;
 
   late final AnimationController _animController;
@@ -53,19 +55,40 @@ class _LoginScreenState extends State<LoginScreen>
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    if (!mounted) return;
-
-    setState(() => _isLoading = false);
+    ref
+        .read(authViewModelProvider.notifier)
+        .loginUser(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDark;
     final textTheme = context.textTheme;
+    final authState = ref.watch(authViewModelProvider);
 
+    ref.listen(authViewModelProvider, (previous, next) {
+      next.whenOrNull(
+        error: (error, stackTrace) {
+          showCustomSnackBar(
+            context: context,
+            message: error.toString(),
+            type: SnackBarType.failure,
+          );
+        },
+        data: (user) {
+          if (user != null && previous?.isLoading == true && !next.isLoading) {
+            showCustomSnackBar(
+              context: context,
+              message: 'Login successful',
+              type: SnackBarType.success,
+            );
+          }
+        },
+      );
+    });
     return Scaffold(
       body: Stack(
         children: [
@@ -180,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen>
                         const SizedBox(height: 8),
 
                         AppGradientButton(
-                          isLoading: _isLoading,
+                          isLoading: authState.isLoading,
                           label: 'Sign In',
                           onPressed: _handleLogin,
                         ),
@@ -229,4 +252,3 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 }
-

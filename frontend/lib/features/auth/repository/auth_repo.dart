@@ -35,7 +35,6 @@ class AuthRepo {
 
       final data = response.data;
       if (data != null && data['user'] != null) {
-        print(data);
         final userModel = UserModel.fromJson(data['user']);
         if (data['token'] != null) {
           await secureStorage.setToken("token", data['token']);

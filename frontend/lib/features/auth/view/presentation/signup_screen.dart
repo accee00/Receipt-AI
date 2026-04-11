@@ -103,7 +103,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
               message: 'Account created successfully!',
               type: SnackBarType.success,
             );
-            Navigator.of(context).pop();
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
           }
         },
       );

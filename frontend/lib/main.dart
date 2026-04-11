@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_theme.dart';
-import 'package:frontend/features/auth/view/presentation/onboard_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/auth/view/presentation/splash_screen.dart';
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const OnboardScreen(),
+      home: const SplashScreen(),
     );
   }
 }
