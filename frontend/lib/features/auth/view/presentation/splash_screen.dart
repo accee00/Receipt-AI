@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/auth/view/presentation/login_screen.dart';
 import 'package:frontend/features/auth/viewmodel/auth_view_model.dart';
+import 'package:go_router/go_router.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -17,18 +17,9 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
       next.whenOrNull(
         data: (user) {
           if (user != null) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    Scaffold(body: Center(child: Text("Home"))),
-              ),
-            );
+            context.go("/home");
           } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
-            );
+            context.go("/login");
           }
         },
       );
