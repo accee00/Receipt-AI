@@ -1,4 +1,5 @@
 import { Expense } from "../models/expense.model.js";
+import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/api.error.js";
 import { ApiResponse } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -48,6 +49,9 @@ const getDashboardData = asyncHandler(async (req, res) => {
     const expenses = await Expense.find(matchStage);
     const insights = await generateInsights(expenses);
 
+    const user = await User.findById(userId).select("budgetLimit");
+    const budgetLimit = user?.budgetLimit || 0;
+
     return res.status(200).json(
         new ApiResponse({
             statusCode: 200,
@@ -57,6 +61,7 @@ const getDashboardData = asyncHandler(async (req, res) => {
                 totalItems: dashboardStats.totalItems,
                 totalCategories: dashboardStats.totalCategories,
                 totalMerchants: dashboardStats.totalMerchants,
+                budgetLimit,
                 insights,
             },
         })
@@ -70,15 +75,17 @@ const addExpense = asyncHandler(async (req, res) => {
         throw new ApiError({ statusCode: 400, message: "Merchant and category are required" });
     }
 
-
-
     const totalAmount = items && items.length > 0
-        ? items.reduce((acc, item) => acc + (item.amount || item.price || 0), 0) : "00";
+        ? items.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
+        : 0;
 
     const expense = await Expense.create({
         merchant,
         totalAmount,
-        items,
+        items: (items || []).map(item => ({
+            name: item.name,
+            amount: Number(item.amount) || 0
+        })),
         date: date ? new Date(date) : new Date(),
         category,
         description,
@@ -233,8 +240,7 @@ const updateExpense = asyncHandler(async (req, res) => {
     if (date !== undefined) updateFields.date = date;
 
     if (items !== undefined) {
-        updateFields.items = items.map(({ _id, name, amount }) => ({
-            _id,
+        updateFields.items = items.map(({ name, amount }) => ({
             name,
             amount: Number(amount) || 0,
         }));

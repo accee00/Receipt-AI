@@ -98,4 +98,26 @@ const updateUserName = asyncHandler(async (req, res) => {
     );
 });
 
-export { signUpUser, loginUser, getCurrentUser, updateUserName };
+const addBudget = asyncHandler(async (req, res) => {
+    const { amount } = req.body;
+    if (!amount) {
+        throw new ApiError({ statusCode: 400, message: "Amount is required" });
+    }
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { budgetLimit: amount },
+        { new: true }
+    ).select("-password");
+    if (!user) {
+        throw new ApiError({ statusCode: 404, message: "User not found" });
+    }
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "Budget added successfully",
+            data: user,
+        })
+    );
+});
+
+export { signUpUser, loginUser, getCurrentUser, updateUserName, addBudget };

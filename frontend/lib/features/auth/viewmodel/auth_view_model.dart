@@ -12,7 +12,7 @@ class AuthViewModel extends _$AuthViewModel {
 
   @override
   Future<UserModel?> build() async {
-    _authRepo = ref.watch(authRepoProvider);
+    _authRepo = ref.read(authRepoProvider);
     final result = await _authRepo.getCurrentUser();
     return result.fold((failure) => null, (userModel) => userModel);
   }

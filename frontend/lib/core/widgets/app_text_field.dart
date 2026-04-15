@@ -6,12 +6,14 @@ class AppTextField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final TextInputAction textInputAction;
   final bool obscureText;
-  final String labelText;
-  final String hintText;
+  final String? labelText;
+  final String? hintText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onFieldSubmitted;
+  final ValueChanged<String>? onChanged;
+  final int? maxLines;
 
   const AppTextField({
     super.key,
@@ -20,12 +22,14 @@ class AppTextField extends StatelessWidget {
     this.textCapitalization = TextCapitalization.none,
     this.textInputAction = TextInputAction.next,
     this.obscureText = false,
-    required this.labelText,
-    required this.hintText,
+    this.labelText,
+    this.hintText,
     this.prefixIcon,
     this.suffixIcon,
     this.validator,
     this.onFieldSubmitted,
+    this.onChanged,
+    this.maxLines = 1,
   });
 
   @override
@@ -37,6 +41,8 @@ class AppTextField extends StatelessWidget {
       textInputAction: textInputAction,
       obscureText: obscureText,
       onFieldSubmitted: onFieldSubmitted,
+      onChanged: onChanged,
+      maxLines: maxLines,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,

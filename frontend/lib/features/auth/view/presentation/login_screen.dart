@@ -10,6 +10,7 @@ import 'package:frontend/features/auth/view/presentation/signup_screen.dart';
 import 'package:frontend/features/auth/view/widgets/brand_header.dart';
 import 'package:frontend/features/auth/view/widgets/or_divider.dart';
 import 'package:frontend/features/auth/viewmodel/auth_view_model.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -86,6 +87,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               type: SnackBarType.success,
             );
           }
+          context.pushReplacement("/home");
         },
       );
     });
