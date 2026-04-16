@@ -37,6 +37,9 @@ class DioClient {
   }
 
   Failure _handleDioError(DioException e) {
+    if (e.type == DioExceptionType.cancel) {
+      return Failure('Request cancelled');
+    }
     String errorMessage = e.message ?? 'An unknown error occurred';
     if (e.response?.data['message'] != null) {
       errorMessage = e.response!.data['message'];

@@ -24,7 +24,7 @@ Extract the following information from the receipt and return ONLY valid JSON ma
 
 {
   "merchant": "Clean store or restaurant name (do not include address or store number)",
-  "total": 0.00,
+  "totalAmount": 0.00,
   "date": "YYYY-MM-DD",
   "category": "Must be exactly one of: ['food', 'transport', 'shopping', 'health', 'entertainment', 'utilities', 'travel', 'other']",
   "items": [
@@ -89,7 +89,7 @@ Extraction Rules:
         } catch (_) {
             date = new Date();
         }
-
+        console.log(json);
         return {
             merchant: json.merchant || "Unknown Merchant",
             total: Number(json.total) || 0.0,

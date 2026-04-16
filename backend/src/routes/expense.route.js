@@ -5,7 +5,6 @@ import {
     addExpense,
     scanReceiptImage,
     getUserExpenseInsights,
-    getAllExpense,
     updateExpense,
     deleteExpense,
     getExpense,
@@ -19,10 +18,10 @@ router.use(verifyToken);
 
 router.route("/dashboard").get(getDashboardData);
 router.route("/insights").get(getUserExpenseInsights);
-router.route("/filter").get(getExpenseByMonthOrCategory);
+router.route("/").get(getExpenseByMonthOrCategory);
 router.route("/add-expense").post(addExpense);
 router.route("/scan-receipt").post(upload.single("receipt"), scanReceiptImage);
-router.route("/").get(getAllExpense);
+
 
 router.route("/:expenseId")
     .get(getExpense)

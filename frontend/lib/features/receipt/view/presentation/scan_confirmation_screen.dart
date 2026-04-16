@@ -5,8 +5,10 @@ import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
 
+import 'package:frontend/features/receipt/model/scan_result_model.dart';
+
 class ScanConfirmationScreen extends ConsumerStatefulWidget {
-  final Map<String, dynamic> extractedData;
+  final ScanResultModel extractedData;
   final String imageUrl;
 
   const ScanConfirmationScreen({
@@ -31,15 +33,13 @@ class _ScanConfirmationScreenState
   void initState() {
     super.initState();
     _merchantController = TextEditingController(
-      text: widget.extractedData['merchant'],
+      text: widget.extractedData.merchant,
     );
     _amountController = TextEditingController(
-      text: widget.extractedData['total']?.toString(),
+      text: widget.extractedData.totalAmount.toString(),
     );
-    _selectedCategory = widget.extractedData['category'] ?? 'other';
-    _items = List<Map<String, dynamic>>.from(
-      widget.extractedData['items'] ?? [],
-    );
+    _selectedCategory = widget.extractedData.category;
+    _items = List<Map<String, dynamic>>.from(widget.extractedData.items);
   }
 
   @override

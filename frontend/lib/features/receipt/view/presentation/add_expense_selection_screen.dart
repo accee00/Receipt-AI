@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
+import 'package:frontend/core/utils/image_picker.dart';
 import 'package:frontend/features/receipt/view/presentation/add_manual_expense_screen.dart';
 import 'package:frontend/features/receipt/view/presentation/scanning_receipt_screen.dart';
 
@@ -33,14 +34,13 @@ class AddExpenseSelectionScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
               Text(
                 'Choose a method',
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
               _buildSelectionCard(
                 context: context,
@@ -49,16 +49,67 @@ class AddExpenseSelectionScreen extends StatelessWidget {
                 subtitle: 'Extract items and totals using AI',
                 isPrimary: true,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScanningReceiptScreen(),
-                    ),
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.camera_alt),
+                              title: const Text('Take Photo'),
+                              onTap: () async {
+                                final file = await CentralizedImagePicker()
+                                    .pickImageFromCamera();
+
+                                if (file != null) {
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ScanningReceiptScreen(file: file),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.photo),
+                              title: const Text('Choose from Gallery'),
+                              onTap: () async {
+                                final file = await CentralizedImagePicker()
+                                    .pickImageFromGallery();
+
+                                if (file != null) {
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ScanningReceiptScreen(file: file),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                 },
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
 
               _buildSelectionCard(
                 context: context,

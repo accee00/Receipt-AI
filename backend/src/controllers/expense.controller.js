@@ -52,6 +52,8 @@ const getDashboardData = asyncHandler(async (req, res) => {
     const user = await User.findById(userId).select("budgetLimit");
     const budgetLimit = user?.budgetLimit || 0;
 
+    const recentExpense = await Expense.find({ user: userId }).sort({ createdAt: -1 }).limit(10);
+
     return res.status(200).json(
         new ApiResponse({
             statusCode: 200,
@@ -61,8 +63,9 @@ const getDashboardData = asyncHandler(async (req, res) => {
                 totalItems: dashboardStats.totalItems,
                 totalCategories: dashboardStats.totalCategories,
                 totalMerchants: dashboardStats.totalMerchants,
-                budgetLimit,
-                insights,
+                recentExpense: recentExpense,
+                budgetLimit: budgetLimit,
+                aiInsights: insights,
             },
         })
     );
@@ -143,21 +146,9 @@ const getUserExpenseInsights = asyncHandler(async (req, res) => {
     );
 });
 
-const getAllExpense = asyncHandler(async (req, res) => {
-    const expenses = await Expense.find({ user: req.user._id });
-    return res.status(200).json(
-        new ApiResponse({
-            statusCode: 200,
-            message: "Expenses fetched successfully",
-            data: expenses,
-        })
-    );
-});
-
 const getExpenseByMonthOrCategory = asyncHandler(async (req, res) => {
 
-    const paramsAndQuery = { ...req.params, ...req.query };
-    const { month, year, category, amount, merchant, startDate, endDate } = paramsAndQuery;
+    const { month, year, category, amount, merchant, startDate, endDate, page, limit } = req.query;
 
     const dbQuery = { user: req.user._id };
 
@@ -186,13 +177,33 @@ const getExpenseByMonthOrCategory = asyncHandler(async (req, res) => {
         dbQuery.merchant = merchant;
     }
 
-    const expenses = await Expense.find(dbQuery);
+    const expenseAggregate = Expense.aggregate([
+        { $match: dbQuery },
+        { $sort: { createdAt: -1 } }
+    ]);
+
+    const options = {
+        page: parseInt(page) || 1,
+        limit: parseInt(limit) || 10,
+    };
+
+    const result = await Expense.aggregatePaginate(expenseAggregate, options);
 
     return res.status(200).json(
         new ApiResponse({
             statusCode: 200,
             message: "Expenses fetched successfully",
-            data: expenses,
+            data: {
+                expenses: result.docs,
+                pagination: {
+                    totalExpenses: result.totalDocs,
+                    totalPages: result.totalPages,
+                    currentPage: result.page,
+                    limit: result.limit,
+                    hasNextPage: result.hasNextPage,
+                    hasPrevPage: result.hasPrevPage
+                },
+            },
         })
     );
 });
@@ -229,14 +240,13 @@ const getExpense = asyncHandler(async (req, res) => {
 
 const updateExpense = asyncHandler(async (req, res) => {
     const { expenseId } = req.params;
-    const { merchant, items, category, description, notes, receiptImage, date } = req.body || {};
+    const { merchant, items, category, description, notes, date } = req.body || {};
 
     const updateFields = {};
     if (merchant !== undefined) updateFields.merchant = merchant;
     if (category !== undefined) updateFields.category = category;
     if (description !== undefined) updateFields.description = description;
     if (notes !== undefined) updateFields.notes = notes;
-    if (receiptImage !== undefined) updateFields.receiptImage = receiptImage;
     if (date !== undefined) updateFields.date = date;
 
     if (items !== undefined) {
@@ -278,7 +288,6 @@ export {
     addExpense,
     scanReceiptImage,
     getUserExpenseInsights,
-    getAllExpense,
     getExpenseByMonthOrCategory,
     deleteExpense,
     updateExpense,

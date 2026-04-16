@@ -29,7 +29,7 @@ class ExpenseModel {
       items: (json['items'] as List? ?? [])
           .map((item) => ExpenseItem.fromJson(item))
           .toList(),
-      date: DateTime.parse(json['date']),
+      date: DateTime.parse(json['date'] as String),
       category: json['category'] ?? 'other',
       description: json['description'],
       notes: json['notes'],

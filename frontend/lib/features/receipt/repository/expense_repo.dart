@@ -5,6 +5,7 @@ import 'package:frontend/core/network/dio_client.dart';
 import 'package:frontend/core/utils/api_response.dart';
 import 'package:frontend/core/utils/failure.dart';
 import 'package:frontend/features/receipt/model/expense_model.dart';
+import 'package:frontend/features/receipt/model/scan_result_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -78,8 +79,9 @@ class ExpenseRepo {
     }
   }
 
-  Future<Either<Failure, Map<String, dynamic>>> scanReceipt(
+  Future<Either<Failure, ScanResultModel>> scanReceipt(
     String filePath,
+    CancelToken? cancelToken,
   ) async {
     try {
       final formData = FormData.fromMap({
@@ -89,11 +91,20 @@ class ExpenseRepo {
       final ApiResponse<Map<String, dynamic>> response = await dioClient.post(
         "expenses/scan-receipt",
         data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+          receiveTimeout: Duration(seconds: 30),
+        ),
+        cancelToken: cancelToken,
       );
 
       final data = response.data;
       if (data != null) {
-        return right(data);
+        final scanResult = ScanResultModel.fromJson(data['extractedData']);
+        final updatedScanResult = scanResult.copyWith(
+          receiptImageUrl: data['receiptImageUrl'],
+        );
+        return right(updatedScanResult);
       }
       return left(Failure("Failed to scan receipt"));
     } on Failure catch (e) {
