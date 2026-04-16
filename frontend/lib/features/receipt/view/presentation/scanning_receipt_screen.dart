@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
+import 'package:go_router/go_router.dart';
 
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
-import 'package:frontend/features/receipt/view/presentation/scan_confirmation_screen.dart';
 import 'package:frontend/features/receipt/viewmodel/scan_receipt_view_model.dart';
 
 class ScanningReceiptScreen extends ConsumerStatefulWidget {
@@ -49,6 +49,19 @@ class _ScanningReceiptScreenState extends ConsumerState<ScanningReceiptScreen>
     final isDark = context.isDark;
     final textTheme = context.textTheme;
     final state = ref.watch(scanReceiptViewModelProvider);
+
+    ref.listen(scanReceiptViewModelProvider, (previous, next) {
+      if (!next.isLoading && !next.hasError && next.value != null) {
+        context.pushReplacement(
+          '/scan-confirmation',
+          extra: {
+            'extractedData': next.value!,
+            'imageUrl': next.value!.receiptImageUrl,
+          },
+        );
+      }
+    });
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -58,8 +71,18 @@ class _ScanningReceiptScreenState extends ConsumerState<ScanningReceiptScreen>
               : AppColors.lightBgGradient,
         ),
         child: SafeArea(
-          child: state.when(
-            loading: () => Column(
+          child: state.maybeWhen(
+            error: (error, stackTrace) {
+              return Center(
+                child: Text(
+                  'Error: $error',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
+            orElse: () => Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(),
@@ -159,47 +182,6 @@ class _ScanningReceiptScreenState extends ConsumerState<ScanningReceiptScreen>
                 ),
               ],
             ),
-            error: (error, stackTrace) {
-              return Center(
-                child: Text(
-                  'Error: $error',
-                  style: textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              );
-            },
-            data: (scanResult) {
-              if (scanResult == null) {
-                return Center(
-                  child: Text(
-                    'No data found',
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                );
-              }
-              return ScanConfirmationScreen(
-                extractedData: scanResult!,
-                imageUrl: scanResult.receiptImageUrl,
-              );
-              // print(scanResult);
-              // return Column(
-              //   children: [
-              //     if (scanResult != null) ...[
-              //       Text(scanResult.merchant),
-              //       Text(scanResult.totalAmount.toString()),
-              //       Text(scanResult.date.toString()),
-              //       Text(scanResult.category),
-              //       Text(scanResult.items.toString()),
-              //       Text(scanResult.receiptImageUrl),
-              //     ] else ...[
-              //       Text('No data'),
-              //     ],
-              //   ],
-              // );
-            },
           ),
         ),
       ),

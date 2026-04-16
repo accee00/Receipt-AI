@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/utils/api_response.dart';
 import 'package:frontend/core/utils/failure.dart';
 import 'package:frontend/core/utils/secure_storage.dart';
@@ -15,7 +17,9 @@ class DioClient {
   DioClient._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: "http://localhost:8000/api/v1/",
+        baseUrl: kIsWeb || !Platform.isAndroid
+            ? "http://localhost:8000/api/v1/"
+            : "http://10.0.2.2:8000/api/v1/",
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),

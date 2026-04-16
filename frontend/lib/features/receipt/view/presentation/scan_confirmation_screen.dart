@@ -39,7 +39,7 @@ class _ScanConfirmationScreenState
       text: widget.extractedData.totalAmount.toString(),
     );
     _selectedCategory = widget.extractedData.category;
-    _items = List<Map<String, dynamic>>.from(widget.extractedData.items);
+    _items = widget.extractedData.items.map((e) => e.toJson()).toList();
   }
 
   @override

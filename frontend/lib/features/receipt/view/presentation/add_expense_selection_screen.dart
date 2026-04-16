@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/utils/image_picker.dart';
-import 'package:frontend/features/receipt/view/presentation/add_manual_expense_screen.dart';
-import 'package:frontend/features/receipt/view/presentation/scanning_receipt_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class AddExpenseSelectionScreen extends StatelessWidget {
   const AddExpenseSelectionScreen({super.key});
@@ -69,12 +68,9 @@ class AddExpenseSelectionScreen extends StatelessWidget {
                                     return;
                                   }
                                   Navigator.pop(context);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ScanningReceiptScreen(file: file),
-                                    ),
+                                  context.push(
+                                    '/scanning-receipt',
+                                    extra: file,
                                   );
                                 }
                               },
@@ -91,12 +87,9 @@ class AddExpenseSelectionScreen extends StatelessWidget {
                                     return;
                                   }
                                   Navigator.pop(context);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ScanningReceiptScreen(file: file),
-                                    ),
+                                  context.push(
+                                    '/scanning-receipt',
+                                    extra: file,
                                   );
                                 }
                               },
@@ -118,12 +111,7 @@ class AddExpenseSelectionScreen extends StatelessWidget {
                 subtitle: 'Type in the details yourself',
                 isPrimary: false,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddManualExpenseScreen(),
-                    ),
-                  );
+                  context.push('/add-manual-expense');
                 },
               ),
             ],
