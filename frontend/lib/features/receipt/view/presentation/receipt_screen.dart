@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
+import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/viewmodel/expense_view_model.dart';
 import 'package:intl/intl.dart';
 
@@ -146,7 +147,6 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Search + Filter Toggle Row ──────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
             child: Row(
@@ -169,7 +169,6 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
             ),
           ),
 
-          // ── Month Strip ─────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.only(top: 14, bottom: 2),
             child: _MonthStrip(
@@ -183,7 +182,6 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
             ),
           ),
 
-          // ── Animated Filter Panel ───────────────────────────────
           FadeTransition(
             opacity: _filterFadeAnim,
             child: SlideTransition(
@@ -205,7 +203,6 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
             ),
           ),
 
-          // ── Results header ──────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
             child: Row(
@@ -232,7 +229,6 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
 
           const SizedBox(height: 10),
 
-          // ── Expense List ────────────────────────────────────────
           Expanded(
             child: expensesAsync.when(
               data: (expenses) {
@@ -313,12 +309,8 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
   }
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 String _capitalize(String s) =>
     s.isEmpty ? s : s[0].toUpperCase() + s.substring(1).toLowerCase();
-
-// ── Subwidgets ────────────────────────────────────────────────────────────────
 
 class _AiInsightsBadge extends StatelessWidget {
   final TextTheme textTheme;
@@ -777,7 +769,7 @@ class _CountBadge extends StatelessWidget {
 }
 
 class _ExpenseCard extends StatelessWidget {
-  final dynamic expense;
+  final ExpenseModel expense;
   final bool isDark;
   final TextTheme textTheme;
   final Color accentColor;
@@ -814,7 +806,6 @@ class _ExpenseCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Icon bubble
           Container(
             width: 48,
             height: 48,
@@ -826,7 +817,6 @@ class _ExpenseCard extends StatelessWidget {
           ),
           const SizedBox(width: 14),
 
-          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -842,7 +832,6 @@ class _ExpenseCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    // Category pill
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -887,7 +876,6 @@ class _ExpenseCard extends StatelessWidget {
 
           const SizedBox(width: 10),
 
-          // Amount
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

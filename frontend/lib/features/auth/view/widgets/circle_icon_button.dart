@@ -18,8 +18,8 @@ class CircleIconButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: 44,
-        height: 44,
+        height: 40,
+        width: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isDark ? AppColors.darkCard : AppColors.lightCard,
@@ -28,12 +28,15 @@ class CircleIconButton extends StatelessWidget {
             width: 1.5,
           ),
         ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: isDark
-              ? AppColors.darkTextPrimary
-              : AppColors.lightTextPrimary,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 3.0),
+          child: Icon(
+            icon,
+            size: 18,
+            color: isDark
+                ? AppColors.darkTextPrimary
+                : AppColors.lightTextPrimary,
+          ),
         ),
       ),
     );
