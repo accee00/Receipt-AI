@@ -133,7 +133,15 @@ const scanReceiptImage = asyncHandler(async (req, res) => {
 });
 
 const getUserExpenseInsights = asyncHandler(async (req, res) => {
-    const expenses = await Expense.find({ user: req.user._id });
+    const { startDate, endDate } = req.query;
+
+    const expenses = await Expense.find({
+        user: req.user._id,
+        date: {
+            $gte: new Date(startDate),
+            $lt: new Date(endDate)
+        }
+    });
 
     const insights = await generateInsights(expenses);
 

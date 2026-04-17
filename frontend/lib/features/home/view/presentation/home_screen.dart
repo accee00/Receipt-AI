@@ -5,7 +5,7 @@ import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/features/ai-chat/view/presentation/ai_chat_screen.dart';
 import 'package:frontend/features/home/view/presentation/dashboard_screen.dart';
 import 'package:frontend/features/receipt/view/presentation/add_expense_selection_screen.dart';
-import 'package:frontend/features/receipt/view/presentation/recept_screen.dart';
+import 'package:frontend/features/receipt/view/presentation/receipt_screen.dart';
 import 'package:frontend/features/profile/view/presentation/profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {

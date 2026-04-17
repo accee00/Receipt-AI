@@ -27,6 +27,10 @@ class ExpenseRepo {
     String? category,
     String? merchant,
     double? amount,
+    int? page,
+    int? limit,
+    String? startDate,
+    String? endDate,
   }) async {
     try {
       final queryParameters = <String, dynamic>{};
@@ -41,18 +45,31 @@ class ExpenseRepo {
       if (amount != null) {
         queryParameters['amount'] = amount;
       }
+      if (page != null) queryParameters['page'] = page;
+      if (limit != null) queryParameters['limit'] = limit;
+      if (startDate != null && startDate.isNotEmpty) {
+        queryParameters['startDate'] = startDate;
+      }
+      if (endDate != null && endDate.isNotEmpty) {
+        queryParameters['endDate'] = endDate;
+      }
 
-      final ApiResponse<List<dynamic>> response = await dioClient.get(
-        "expenses/filter",
+      final ApiResponse<dynamic> response = await dioClient.get(
+        "expenses/",
         queryParameters: queryParameters,
       );
 
-      final data = response.data;
-      if (data != null) {
-        final expenses = data.map((e) => ExpenseModel.fromJson(e)).toList();
-        return right(expenses);
+      final data = response.data as Map<String, dynamic>?;
+      if (data != null && data.containsKey('expenses')) {
+        final expensesList = data['expenses'] as List<dynamic>;
+
+        return right(
+          expensesList
+              .map((e) => ExpenseModel.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        );
       }
-      return left(Failure("Invalid response format"));
+      return left(Failure("Invalid response format: 'expenses' key missing."));
     } on Failure catch (e) {
       return left(e);
     } catch (e) {
