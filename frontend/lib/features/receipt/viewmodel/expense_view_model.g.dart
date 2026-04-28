@@ -33,7 +33,7 @@ final class ExpenseViewModelProvider
   ExpenseViewModel create() => ExpenseViewModel();
 }
 
-String _$expenseViewModelHash() => r'11c155eef862496872d3e14cac8dbfa789b0fc77';
+String _$expenseViewModelHash() => r'b57499f0d88ab7eabb86b0d06f4aa7086c65dfd8';
 
 abstract class _$ExpenseViewModel extends $AsyncNotifier<List<ExpenseModel>> {
   FutureOr<List<ExpenseModel>> build();

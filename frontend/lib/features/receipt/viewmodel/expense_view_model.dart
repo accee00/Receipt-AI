@@ -11,16 +11,24 @@ class ExpenseViewModel extends _$ExpenseViewModel {
   FutureOr<List<ExpenseModel>> build() async {
     expenseRepo = ref.read(expenseRepoProvider);
     final now = DateTime.now();
-    return _fetchExpenses(month: now.month, year: now.year);
+    final response = await expenseRepo.getFilteredExpenses(
+      month: now.month,
+      year: now.year,
+    );
+    return response.fold(
+      (failure) => throw Exception(failure.message),
+      (expenses) => expenses,
+    );
   }
 
-  Future<List<ExpenseModel>> _fetchExpenses({
+  Future<void> _fetchExpenses({
     int? month,
     int? year,
     String? category,
     String? merchant,
     double? amount,
   }) async {
+    state = const AsyncLoading();
     final result = await expenseRepo.getFilteredExpenses(
       month: month,
       year: year,
@@ -28,10 +36,9 @@ class ExpenseViewModel extends _$ExpenseViewModel {
       merchant: merchant,
       amount: amount,
     );
-
-    return result.fold(
-      (failure) => throw Exception(failure.message),
-      (expenses) => expenses,
+    result.fold(
+      (failure) => state = AsyncError(failure.message, StackTrace.current),
+      (expenses) => state = AsyncValue.data(expenses),
     );
   }
 
@@ -43,21 +50,31 @@ class ExpenseViewModel extends _$ExpenseViewModel {
     double? amount,
   }) async {
     state = const AsyncLoading();
-
-    state = await AsyncValue.guard(
-      () => _fetchExpenses(
-        month: month,
-        year: year,
-        category: category,
-        merchant: merchant,
-        amount: amount,
-      ),
+    _fetchExpenses(
+      month: month,
+      year: year,
+      category: category,
+      merchant: merchant,
+      amount: amount,
     );
   }
 
   Future<void> addExpense(ExpenseModel expense) async {
     final result = await expenseRepo.addExpense(expense);
 
+    result.fold(
+      (failure) {
+        state = AsyncError(Exception(failure.message), StackTrace.current);
+      },
+      (_) {
+        ref.invalidateSelf();
+      },
+    );
+  }
+
+  Future<void> deleteExpense(String expenseId) async {
+    state = const AsyncLoading();
+    final result = await expenseRepo.deleteExpense(expenseId: expenseId);
     result.fold(
       (failure) {
         state = AsyncError(Exception(failure.message), StackTrace.current);

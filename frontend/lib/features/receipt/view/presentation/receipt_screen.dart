@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
-import 'package:frontend/features/receipt/model/expense_model.dart';
+import 'package:frontend/core/utils/common_utils.dart';
+import 'package:frontend/core/widgets/custom_dialog.dart';
+import 'package:frontend/core/widgets/custom_month_strip.dart';
+import 'package:frontend/features/receipt/view/presentation/ai_insights_screen.dart';
+import 'package:frontend/features/receipt/view/widget/custom_expense_card.dart';
+import 'package:frontend/features/receipt/view/widget/custom_filter_tab.dart';
+import 'package:frontend/features/receipt/view/widget/custom_search_bar.dart';
 import 'package:frontend/features/receipt/viewmodel/expense_view_model.dart';
-import 'package:intl/intl.dart';
 
 class ReceptScreen extends ConsumerStatefulWidget {
   const ReceptScreen({super.key});
@@ -39,34 +45,6 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
     'Travel',
     'Other',
   ];
-
-  final List<String> _months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  // Map categories → icons + accent colours
-  static const Map<String, (IconData, Color)> _categoryMeta = {
-    'All': (Icons.grid_view_rounded, Color(0xFF00BFA5)),
-    'Food': (Icons.restaurant_rounded, Color(0xFFFF7043)),
-    'Transport': (Icons.directions_car_rounded, Color(0xFF42A5F5)),
-    'Shopping': (Icons.shopping_bag_rounded, Color(0xFFAB47BC)),
-    'Health': (Icons.favorite_rounded, Color(0xFFEF5350)),
-    'Entertainment': (Icons.local_movies_rounded, Color(0xFFFFCA28)),
-    'Utilities': (Icons.bolt_rounded, Color(0xFF26C6DA)),
-    'Travel': (Icons.flight_takeoff_rounded, Color(0xFF26A69A)),
-    'Other': (Icons.more_horiz_rounded, Color(0xFF78909C)),
-  };
 
   @override
   void initState() {
@@ -132,14 +110,13 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Expenses',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          style: textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        actions: [
-          _AiInsightsBadge(textTheme: textTheme),
-          const SizedBox(width: 16),
-        ],
+        actions: [_aiInsightsButton(textTheme), const SizedBox(width: 16)],
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
@@ -152,7 +129,7 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
             child: Row(
               children: [
                 Expanded(
-                  child: _SearchBar(
+                  child: CustomSearchBar(
                     controller: _merchantSearchController,
                     isDark: isDark,
                     onChanged: (_) => _applyFilters(),
@@ -171,10 +148,8 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
 
           Padding(
             padding: const EdgeInsets.only(top: 14, bottom: 2),
-            child: _MonthStrip(
+            child: CustomMonthStrip(
               selectedMonth: _selectedMonth,
-              months: _months,
-              isDark: isDark,
               onChanged: (m) {
                 setState(() => _selectedMonth = m);
                 _applyFilters();
@@ -187,10 +162,10 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
             child: SlideTransition(
               position: _filterSlideAnim,
               child: _showFilters
-                  ? _FilterPanel(
+                  ? CustomFilterTab(
                       isDark: isDark,
                       categories: _categories,
-                      categoryMeta: _categoryMeta,
+                      categoryMeta: CommonUtils.categoryMeta,
                       selectedCategory: _selectedCategory,
                       priceController: _priceFilterController,
                       onCategoryChanged: (c) {
@@ -219,8 +194,23 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
                   ),
                 ),
                 expensesAsync.maybeWhen(
-                  data: (expenses) =>
-                      _CountBadge(count: expenses.length, isDark: isDark),
+                  data: (expenses) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${expenses.length} total',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                   orElse: () => const SizedBox.shrink(),
                 ),
               ],
@@ -239,14 +229,48 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
                   itemBuilder: (context, index) {
                     final expense = expenses[index];
                     final meta =
-                        _categoryMeta[_capitalize(expense.category)] ??
-                        _categoryMeta['Other']!;
-                    return _ExpenseCard(
-                      expense: expense,
-                      isDark: isDark,
-                      textTheme: textTheme,
-                      accentColor: meta.$2,
-                      icon: meta.$1,
+                        CommonUtils.categoryMeta[capitalize(
+                          expense.category,
+                        )] ??
+                        CommonUtils.categoryMeta['Other']!;
+                    return Slidable(
+                      key: ValueKey(expense.id),
+                      endActionPane: ActionPane(
+                        motion: const BehindMotion(),
+                        extentRatio: 0.4,
+                        children: [
+                          CustomSlidableAction(
+                            onPressed: (context) {},
+                            backgroundColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                            child: Icon(
+                              Icons.edit_note_rounded,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
+                          ),
+                          CustomSlidableAction(
+                            onPressed: (context) {
+                              _showDeleteConfirmation(context, expense.id);
+                            },
+                            backgroundColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                            child: Icon(
+                              Icons.delete_outline_rounded,
+                              color: Colors.redAccent,
+                              size: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                      child: CustomExpenseCard(
+                        key: ValueKey('expense-${expense.id}'),
+                        expense: expense,
+                        isDark: isDark,
+                        textTheme: textTheme,
+                        accentColor: meta.$2,
+                        icon: meta.$1,
+                      ),
                     );
                   },
                 );
@@ -261,6 +285,58 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext ctx, String id) {
+    showDialog(
+      context: ctx,
+      builder: (context) => CustomDialog(
+        title: 'Delete Expense?',
+        content: 'This action cannot be undone.',
+        cancelText: 'Cancel',
+        confirmText: 'Delete',
+        onCancel: () => Navigator.pop(context),
+        onConfirm: () {
+          // ref.read(expenseViewModelProvider.notifier).deleteExpense(id);
+        },
+      ),
+    );
+  }
+
+  GestureDetector _aiInsightsButton(TextTheme textTheme) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                AiInsightsScreen(month: _selectedMonth, year: _selectedYear),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.auto_awesome, color: AppColors.primary, size: 15),
+            const SizedBox(width: 6),
+            Text(
+              'AI Insights',
+              style: textTheme.labelSmall?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -304,115 +380,6 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-}
-
-String _capitalize(String s) =>
-    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1).toLowerCase();
-
-class _AiInsightsBadge extends StatelessWidget {
-  final TextTheme textTheme;
-  const _AiInsightsBadge({required this.textTheme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.auto_awesome, color: AppColors.primary, size: 15),
-          const SizedBox(width: 6),
-          Text(
-            'AI Insights',
-            style: textTheme.labelSmall?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.3,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SearchBar extends StatelessWidget {
-  final TextEditingController controller;
-  final bool isDark;
-  final ValueChanged<String> onChanged;
-
-  const _SearchBar({
-    required this.controller,
-    required this.isDark,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      style: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.white : Colors.black87,
-      ),
-      decoration: InputDecoration(
-        hintText: 'Search merchant...',
-        hintStyle: TextStyle(
-          fontSize: 13.5,
-          color: isDark ? Colors.white30 : Colors.black38,
-        ),
-        prefixIcon: Icon(
-          Icons.search_rounded,
-          size: 20,
-          color: isDark ? Colors.white30 : Colors.black38,
-        ),
-        suffixIcon: ValueListenableBuilder(
-          valueListenable: controller,
-          builder: (_, val, _) => val.text.isNotEmpty
-              ? GestureDetector(
-                  onTap: () {
-                    controller.clear();
-                    onChanged('');
-                  },
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: 18,
-                    color: isDark ? Colors.white38 : Colors.black38,
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
-        filled: true,
-        fillColor: isDark ? AppColors.darkCard : Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 13,
-        ),
-        isDense: true,
       ),
     );
   }
@@ -475,432 +442,6 @@ class _FilterToggleButton extends StatelessWidget {
               ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MonthStrip extends StatelessWidget {
-  final int selectedMonth;
-  final List<String> months;
-  final bool isDark;
-  final ValueChanged<int> onChanged;
-
-  const _MonthStrip({
-    required this.selectedMonth,
-    required this.months,
-    required this.isDark,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 38,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 12,
-        itemBuilder: (context, index) {
-          final isSelected = selectedMonth == index + 1;
-          return GestureDetector(
-            onTap: () => onChanged(index + 1),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                gradient: isSelected ? AppColors.primaryGradient : null,
-                color: isSelected
-                    ? null
-                    : (isDark ? AppColors.darkCard : Colors.white),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected
-                      ? Colors.transparent
-                      : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
-                  width: 1,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.35),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : null,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                months[index],
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : (isDark ? Colors.white54 : Colors.black45),
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  fontSize: 13,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _FilterPanel extends StatelessWidget {
-  final bool isDark;
-  final List<String> categories;
-  final Map<String, (IconData, Color)> categoryMeta;
-  final String selectedCategory;
-  final TextEditingController priceController;
-  final ValueChanged<String> onCategoryChanged;
-  final ValueChanged<String> onPriceChanged;
-
-  const _FilterPanel({
-    required this.isDark,
-    required this.categories,
-    required this.categoryMeta,
-    required this.selectedCategory,
-    required this.priceController,
-    required this.onCategoryChanged,
-    required this.onPriceChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-        ),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Price field
-          _PanelLabel(label: 'Max Amount', isDark: isDark),
-          const SizedBox(height: 8),
-          TextField(
-            controller: priceController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: onPriceChanged,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
-            decoration: InputDecoration(
-              hintText: 'e.g. 500',
-              hintStyle: TextStyle(
-                fontSize: 13,
-                color: isDark ? Colors.white30 : Colors.black38,
-              ),
-              prefixIcon: Icon(
-                Icons.attach_money_rounded,
-                size: 18,
-                color: isDark ? Colors.white30 : Colors.black38,
-              ),
-              filled: true,
-              fillColor: isDark
-                  ? Colors.white.withValues(alpha: 0.04)
-                  : AppColors.lightBackground,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-              isDense: true,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Category
-          _PanelLabel(label: 'Category', isDark: isDark),
-          const SizedBox(height: 10),
-
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: categories.map((cat) {
-              final isSelected = selectedCategory == cat;
-              final meta = categoryMeta[cat] ?? categoryMeta['Other']!;
-              final accent = meta.$2;
-              final icon = meta.$1;
-
-              return GestureDetector(
-                onTap: () => onCategoryChanged(cat),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? accent.withValues(alpha: 0.15)
-                        : (isDark
-                              ? Colors.white.withValues(alpha: 0.04)
-                              : AppColors.lightBackground),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected
-                          ? accent
-                          : (isDark
-                                ? AppColors.darkBorder
-                                : AppColors.lightBorder),
-                      width: isSelected ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        icon,
-                        size: 14,
-                        color: isSelected
-                            ? accent
-                            : (isDark ? Colors.white38 : Colors.black38),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        cat,
-                        style: TextStyle(
-                          color: isSelected
-                              ? accent
-                              : (isDark ? Colors.white60 : Colors.black54),
-                          fontSize: 13,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PanelLabel extends StatelessWidget {
-  final String label;
-  final bool isDark;
-
-  const _PanelLabel({required this.label, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label.toUpperCase(),
-      style: TextStyle(
-        fontSize: 10.5,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 1.1,
-        color: isDark ? Colors.white38 : Colors.black38,
-      ),
-    );
-  }
-}
-
-class _CountBadge extends StatelessWidget {
-  final int count;
-  final bool isDark;
-
-  const _CountBadge({required this.count, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        '$count total',
-        style: const TextStyle(
-          color: AppColors.primary,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _ExpenseCard extends StatelessWidget {
-  final ExpenseModel expense;
-  final bool isDark;
-  final TextTheme textTheme;
-  final Color accentColor;
-  final IconData icon;
-
-  const _ExpenseCard({
-    required this.expense,
-    required this.isDark,
-    required this.textTheme,
-    required this.accentColor,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: isDark
-            ? Border.all(color: AppColors.darkBorder)
-            : Border.all(color: AppColors.lightBorder.withValues(alpha: 0.6)),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: accentColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  expense.merchant,
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2.5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        _capitalize(expense.category),
-                        style: TextStyle(
-                          color: accentColor,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      size: 10,
-                      color: isDark
-                          ? AppColors.darkTextHint
-                          : AppColors.lightTextHint,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      DateFormat('MMM d, yyyy').format(expense.date),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextHint
-                            : AppColors.lightTextHint,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '\$${expense.totalAmount.toStringAsFixed(2)}',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 16,
-                ),
-              ),
-              if (expense.items.isNotEmpty)
-                Text(
-                  '${expense.items.length} item${expense.items.length == 1 ? '' : 's'}',
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color: isDark
-                        ? AppColors.darkTextHint
-                        : AppColors.lightTextHint,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-            ],
-          ),
-        ],
       ),
     );
   }

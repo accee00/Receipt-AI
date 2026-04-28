@@ -2,18 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
+import 'package:frontend/core/widgets/custom_month_strip.dart';
 import 'package:frontend/features/home/view/widgets/summary_card.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  int _selectedMonth = DateTime.now().month;
+
+  @override
+  Widget build(BuildContext context) {
     final bool isDark = context.isDark;
     final TextTheme textTheme = context.textTheme;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -47,46 +54,14 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
 
-          // Month Picker
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 12,
-              itemBuilder: (context, index) {
-                final months = [
-                  'Jan',
-                  'Feb',
-                  'Mar',
-                  'Apr',
-                  'May',
-                  'Jun',
-                  'Jul',
-                  'Aug',
-                  'Sep',
-                  'Oct',
-                  'Nov',
-                  'Dec',
-                ];
-                final isSelected = index == DateTime.now().month - 1;
-                return Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(months[index]),
-                    selected: isSelected,
-                    onSelected: (selected) {},
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : (isDark ? Colors.white70 : Colors.black87),
-                    ),
-                  ),
-                );
-              },
-            ),
+          CustomMonthStrip(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            selectedMonth: _selectedMonth,
+            onChanged: (m) {
+              setState(() => _selectedMonth = m);
+            },
           ),
           const SizedBox(height: 18),
 

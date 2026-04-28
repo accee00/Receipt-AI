@@ -29,8 +29,6 @@ class ExpenseRepo {
     double? amount,
     int? page,
     int? limit,
-    String? startDate,
-    String? endDate,
   }) async {
     try {
       final queryParameters = <String, dynamic>{};
@@ -47,12 +45,6 @@ class ExpenseRepo {
       }
       if (page != null) queryParameters['page'] = page;
       if (limit != null) queryParameters['limit'] = limit;
-      if (startDate != null && startDate.isNotEmpty) {
-        queryParameters['startDate'] = startDate;
-      }
-      if (endDate != null && endDate.isNotEmpty) {
-        queryParameters['endDate'] = endDate;
-      }
 
       final ApiResponse<dynamic> response = await dioClient.get(
         "expenses/",
@@ -96,6 +88,23 @@ class ExpenseRepo {
     }
   }
 
+  Future<Either<Failure, ExpenseModel>> deleteExpense({
+    required String expenseId,
+  }) async {
+    try {
+      final ApiResponse<Map<String, dynamic>> response = await dioClient.delete(
+        "expenses/$expenseId",
+      );
+      final data = response.data;
+      if (data != null) {
+        return right(ExpenseModel.fromJson(data));
+      }
+      return left(Failure("Failed to delete expense"));
+    } on Failure catch (e) {
+      return left(e);
+    }
+  }
+
   Future<Either<Failure, ScanResultModel>> scanReceipt(
     String filePath,
     CancelToken? cancelToken,
@@ -124,6 +133,28 @@ class ExpenseRepo {
         return right(updatedScanResult);
       }
       return left(Failure("Failed to scan receipt"));
+    } on Failure catch (e) {
+      return left(e);
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, String>> getAiInsights({
+    required int month,
+    required int year,
+  }) async {
+    try {
+      final ApiResponse<String> response = await dioClient.get<String>(
+        "expenses/insights",
+        queryParameters: {"month": month, "year": year},
+      );
+
+      final data = response.data;
+      if (data != null) {
+        return right(data);
+      }
+      return left(Failure("Failed to get AI insights"));
     } on Failure catch (e) {
       return left(e);
     } catch (e) {

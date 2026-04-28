@@ -133,13 +133,13 @@ const scanReceiptImage = asyncHandler(async (req, res) => {
 });
 
 const getUserExpenseInsights = asyncHandler(async (req, res) => {
-    const { startDate, endDate } = req.query;
+    const { month, year } = req.query;
 
     const expenses = await Expense.find({
         user: req.user._id,
         date: {
-            $gte: new Date(startDate),
-            $lt: new Date(endDate)
+            $gte: new Date(year, month - 1, 1),
+            $lt: new Date(year, month, 1)
         }
     });
 
@@ -149,14 +149,14 @@ const getUserExpenseInsights = asyncHandler(async (req, res) => {
         new ApiResponse({
             statusCode: 200,
             message: "Insights generated successfully",
-            data: { insights },
+            data: { insights, expenses }
         })
     );
 });
 
 const getExpenseByMonthOrCategory = asyncHandler(async (req, res) => {
 
-    const { month, year, category, amount, merchant, startDate, endDate, page, limit } = req.query;
+    const { month, year, category, amount, merchant, page, limit } = req.query;
 
     const dbQuery = { user: req.user._id };
 
@@ -165,12 +165,6 @@ const getExpenseByMonthOrCategory = asyncHandler(async (req, res) => {
             $gte: new Date(year, month - 1, 1),
             $lt: new Date(year, month, 1)
         };
-    }
-
-    if (startDate || endDate) {
-        dbQuery.date = {};
-        if (startDate) dbQuery.date.$gte = new Date(startDate);
-        if (endDate) dbQuery.date.$lte = new Date(endDate);
     }
 
     if (category && category !== "null" && category.trim() !== "") {
