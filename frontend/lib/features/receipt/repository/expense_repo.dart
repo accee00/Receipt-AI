@@ -7,6 +7,7 @@ import 'package:frontend/core/utils/failure.dart';
 import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/model/scan_result_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:frontend/features/receipt/model/ai_insights_model.dart';
 import 'package:fpdart/fpdart.dart';
 
 part 'expense_repo.g.dart';
@@ -69,7 +70,7 @@ class ExpenseRepo {
     }
   }
 
-  Future<Either<Failure, ExpenseModel>> addExpense(ExpenseModel expense) async {
+  Future<Either<Failure, Unit>> addExpense(ExpenseModel expense) async {
     try {
       final ApiResponse<Map<String, dynamic>> response = await dioClient.post(
         "expenses/add-expense",
@@ -78,7 +79,7 @@ class ExpenseRepo {
 
       final data = response.data;
       if (data != null) {
-        return right(ExpenseModel.fromJson(data));
+        return right(unit);
       }
       return left(Failure("Failed to save expense"));
     } on Failure catch (e) {
@@ -88,7 +89,7 @@ class ExpenseRepo {
     }
   }
 
-  Future<Either<Failure, ExpenseModel>> deleteExpense({
+  Future<Either<Failure, Unit>> deleteExpense({
     required String expenseId,
   }) async {
     try {
@@ -97,7 +98,7 @@ class ExpenseRepo {
       );
       final data = response.data;
       if (data != null) {
-        return right(ExpenseModel.fromJson(data));
+        return right(unit);
       }
       return left(Failure("Failed to delete expense"));
     } on Failure catch (e) {
@@ -140,21 +141,22 @@ class ExpenseRepo {
     }
   }
 
-  Future<Either<Failure, String>> getAiInsights({
+  Future<Either<Failure, AiInsightsModel>> getAiInsights({
     required int month,
     required int year,
   }) async {
     try {
-      final ApiResponse<String> response = await dioClient.get<String>(
+      final ApiResponse<Map<String, dynamic>> response =
+          await dioClient.get<Map<String, dynamic>>(
         "expenses/insights",
         queryParameters: {"month": month, "year": year},
       );
 
       final data = response.data;
       if (data != null) {
-        return right(data);
+        return right(AiInsightsModel.fromJson(data));
       }
-      return left(Failure("Failed to get AI insights"));
+      return left(Failure("Failed to get AI insights: Data format incorrect"));
     } on Failure catch (e) {
       return left(e);
     } catch (e) {

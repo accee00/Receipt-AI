@@ -13,7 +13,7 @@ part of 'ai_insights_view_model.dart';
 final aiInsightsViewModelProvider = AiInsightsViewModelFamily._();
 
 final class AiInsightsViewModelProvider
-    extends $AsyncNotifierProvider<AiInsightsViewModel, String> {
+    extends $AsyncNotifierProvider<AiInsightsViewModel, AiInsightsModel> {
   AiInsightsViewModelProvider._({
     required AiInsightsViewModelFamily super.from,
     required ({int month, int year}) super.argument,
@@ -51,15 +51,15 @@ final class AiInsightsViewModelProvider
 }
 
 String _$aiInsightsViewModelHash() =>
-    r'4fd09692df9f388904f288fecb4b41653120e9e3';
+    r'112c0d28a19943e179c0d9bbb13ff7b42d592483';
 
 final class AiInsightsViewModelFamily extends $Family
     with
         $ClassFamilyOverride<
           AiInsightsViewModel,
-          AsyncValue<String>,
-          String,
-          FutureOr<String>,
+          AsyncValue<AiInsightsModel>,
+          AiInsightsModel,
+          FutureOr<AiInsightsModel>,
           ({int month, int year})
         > {
   AiInsightsViewModelFamily._()
@@ -81,21 +81,21 @@ final class AiInsightsViewModelFamily extends $Family
   String toString() => r'aiInsightsViewModelProvider';
 }
 
-abstract class _$AiInsightsViewModel extends $AsyncNotifier<String> {
+abstract class _$AiInsightsViewModel extends $AsyncNotifier<AiInsightsModel> {
   late final _$args = ref.$arg as ({int month, int year});
   int get month => _$args.month;
   int get year => _$args.year;
 
-  FutureOr<String> build({required int month, required int year});
+  FutureOr<AiInsightsModel> build({required int month, required int year});
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<String>, String>;
+    final ref = this.ref as $Ref<AsyncValue<AiInsightsModel>, AiInsightsModel>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<String>, String>,
-              AsyncValue<String>,
+              AnyNotifier<AsyncValue<AiInsightsModel>, AiInsightsModel>,
+              AsyncValue<AiInsightsModel>,
               Object?,
               Object?
             >;
