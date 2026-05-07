@@ -72,15 +72,16 @@ const getDashboardData = asyncHandler(async (req, res) => {
 });
 
 const addExpense = asyncHandler(async (req, res) => {
-    const { merchant, items, category, description, notes, receiptImage, date } = req.body || {};
+    const { merchant, items, category, description, notes, receiptImage, date, totalAmount: bodyTotalAmount } = req.body || {};
 
     if (!merchant?.trim() || !category?.trim()) {
         throw new ApiError({ statusCode: 400, message: "Merchant and category are required" });
     }
 
+
     const totalAmount = items && items.length > 0
         ? items.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
-        : 0;
+        : (Number(bodyTotalAmount) || 0);
 
     const expense = await Expense.create({
         merchant,

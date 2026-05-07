@@ -6,14 +6,24 @@ class SummaryCard extends StatelessWidget {
     super.key,
     required this.monthlyLimit,
     required this.thisMonthSpend,
+    required this.categoriesCount,
+    required this.itemsCount,
+    required this.highestExpense,
   });
-  final String monthlyLimit;
-  final String thisMonthSpend;
+  final double monthlyLimit;
+  final double thisMonthSpend;
+  final int categoriesCount;
+  final int itemsCount;
+  final double highestExpense;
 
   @override
   Widget build(BuildContext context) {
+    final double progress = monthlyLimit > 0
+        ? (thisMonthSpend / monthlyLimit).clamp(0.0, 1.0)
+        : 0.0;
+
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(24),
@@ -40,7 +50,7 @@ class SummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                "Limit: ₹ $monthlyLimit",
+                "Limit: \$ ${monthlyLimit.toStringAsFixed(0)}",
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 12,
@@ -51,8 +61,8 @@ class SummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "₹ $thisMonthSpend",
-            style: TextStyle(
+            "\$ ${thisMonthSpend.toStringAsFixed(2)}",
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 36,
               fontWeight: FontWeight.bold,
@@ -74,7 +84,7 @@ class SummaryCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '62%',
+                    '${(progress * 100).toStringAsFixed(0)}%',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 12,
@@ -87,7 +97,7 @@ class SummaryCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: LinearProgressIndicator(
-                  value: 0.62,
+                  value: progress,
                   backgroundColor: Colors.white.withValues(alpha: 0.2),
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                   minHeight: 8,
@@ -99,9 +109,12 @@ class SummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatCol('Categories', '5'),
-              _buildStatCol('Receipts', '12'),
-              _buildStatCol('Highest', '\$300'),
+              _buildStatCol('Categories', categoriesCount.toString()),
+              _buildStatCol('Receipts', itemsCount.toString()),
+              _buildStatCol(
+                'Highest',
+                '\$${highestExpense.toStringAsFixed(0)}',
+              ),
             ],
           ),
         ],

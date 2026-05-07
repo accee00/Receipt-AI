@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
-
 import 'package:frontend/core/di/riverpod_di.dart';
 import 'package:frontend/core/network/dio_client.dart';
 import 'package:frontend/core/utils/api_response.dart';
 import 'package:frontend/core/utils/failure.dart';
+import 'package:frontend/features/receipt/model/ai_insights_model.dart';
+import 'package:frontend/features/receipt/model/dashboard_model.dart';
 import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/model/scan_result_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:frontend/features/receipt/model/ai_insights_model.dart';
 import 'package:fpdart/fpdart.dart';
 
 part 'expense_repo.g.dart';
@@ -120,7 +120,7 @@ class ExpenseRepo {
         data: formData,
         options: Options(
           contentType: 'multipart/form-data',
-          receiveTimeout: Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
         ),
         cancelToken: cancelToken,
       );
@@ -134,6 +134,37 @@ class ExpenseRepo {
         return right(updatedScanResult);
       }
       return left(Failure("Failed to scan receipt"));
+    } on Failure catch (e) {
+      return left(e);
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, DashboardModel>> getDashboardData({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{};
+      if (startDate != null) {
+        queryParameters['startDate'] = startDate.toIso8601String();
+      }
+      if (endDate != null) {
+        queryParameters['endDate'] = endDate.toIso8601String();
+      }
+
+      final ApiResponse<Map<String, dynamic>> response =
+          await dioClient.get<Map<String, dynamic>>(
+        "expenses/dashboard",
+        queryParameters: queryParameters,
+      );
+
+      final data = response.data;
+      if (data != null) {
+        return right(DashboardModel.fromJson(data));
+      }
+      return left(Failure("Failed to get dashboard data"));
     } on Failure catch (e) {
       return left(e);
     } catch (e) {

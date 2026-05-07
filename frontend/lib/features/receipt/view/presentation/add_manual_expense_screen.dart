@@ -6,6 +6,7 @@ import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
 import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/viewmodel/expense_view_model.dart';
+import 'package:frontend/core/utils/custom_snackbar.dart';
 
 class AddManualExpenseScreen extends ConsumerStatefulWidget {
   const AddManualExpenseScreen({super.key});
@@ -22,6 +23,7 @@ class _AddManualExpenseScreenState
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _notesController = TextEditingController();
+  bool _isLoading = false;
 
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = 'food';
@@ -59,6 +61,9 @@ class _AddManualExpenseScreenState
     });
   }
 
+  double get _calculatedTotal =>
+      _items.fold(0.0, (sum, item) => sum + (item['amount'] as double));
+
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDark;
@@ -74,6 +79,7 @@ class _AddManualExpenseScreenState
         elevation: 0,
       ),
       body: Container(
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: isDark
               ? AppColors.darkBgGradient
@@ -91,61 +97,53 @@ class _AddManualExpenseScreenState
                   labelText: 'Merchant Name',
                   hintText: 'e.g. Starbucks',
                   prefixIcon: const Icon(Icons.storefront_rounded),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return 'Please enter a merchant name';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
                 Row(
                   children: [
                     Expanded(
-                      child: AppTextField(
-                        controller: _amountController,
-                        labelText: 'Total Amount',
-                        hintText: '0.00',
-                        keyboardType: TextInputType.number,
-                        prefixIcon: const Icon(Icons.attach_money_rounded),
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Total Amount',
+                          prefixIcon: Icon(Icons.attach_money_rounded),
+                        ),
+                        child: Text(
+                          _calculatedTotal.toStringAsFixed(2),
+                          style: textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Category', style: textTheme.bodySmall),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? AppColors.darkCard
-                                  : AppColors.lightBackground,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isDark
-                                    ? AppColors.darkBorder
-                                    : AppColors.lightBorder,
-                              ),
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _selectedCategory,
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          prefixIcon: Icon(Icons.category_rounded),
+                        ),
+                        items: _categories.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value[0].toUpperCase() + value.substring(1),
                             ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: _selectedCategory,
-                                isExpanded: true,
-                                items: _categories.map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (String? newValue) {
-                                  if (newValue != null) {
-                                    setState(
-                                      () => _selectedCategory = newValue,
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() => _selectedCategory = newValue);
+                          }
+                        },
                       ),
                     ),
                   ],
@@ -164,28 +162,14 @@ class _AddManualExpenseScreenState
                       setState(() => _selectedDate = picked);
                     }
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkCard
-                          : AppColors.lightBackground,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.darkBorder
-                            : AppColors.lightBorder,
-                      ),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Date',
+                      prefixIcon: Icon(Icons.calendar_today_rounded),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_rounded, size: 20),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Date: ${_selectedDate.toLocal()}'.split(' ')[0],
-                          style: textTheme.bodyLarge,
-                        ),
-                      ],
+                    child: Text(
+                      '${_selectedDate.toLocal()}'.split(' ')[0],
+                      style: textTheme.bodyLarge,
                     ),
                   ),
                 ),
@@ -236,8 +220,12 @@ class _AddManualExpenseScreenState
                               labelText: 'Amount',
                               hintText: '0.00',
                               keyboardType: TextInputType.number,
-                              onChanged: (v) => _items[index]['amount'] =
-                                  double.tryParse(v) ?? 0.0,
+                              onChanged: (v) {
+                                setState(() {
+                                  _items[index]['amount'] =
+                                      double.tryParse(v) ?? 0.0;
+                                });
+                              },
                             ),
                           ),
                           IconButton(
@@ -273,28 +261,66 @@ class _AddManualExpenseScreenState
 
                 AppGradientButton(
                   label: 'Save Expense',
-                  onPressed: () {
-                    ref
-                        .read(expenseViewModelProvider.notifier)
-                        .addExpense(
-                          ExpenseModel(
-                            id: "",
-                            merchant: _merchantController.text.trim(),
-                            totalAmount: double.parse(
-                              _amountController.text.trim(),
-                            ),
-                            items: _items
-                                .map(
-                                  (e) => ExpenseItem(
-                                    name: e['name'],
-                                    amount: e['amount'],
-                                  ),
-                                )
-                                .toList(),
-                            date: DateTime.now(),
-                            category: _selectedCategory,
-                          ),
+                  isLoading: _isLoading,
+                  onPressed: () async {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      if (_items.isEmpty) {
+                        showCustomSnackBar(
+                          context: context,
+                          message: 'Please add at least one item',
+                          type: SnackBarType.failure,
                         );
+                        return;
+                      }
+
+                      setState(() => _isLoading = true);
+                      try {
+                        final amount = _calculatedTotal;
+                        await ref
+                            .read(expenseViewModelProvider.notifier)
+                            .addExpense(
+                              ExpenseModel(
+                                id: "",
+                                merchant: _merchantController.text.trim(),
+                                totalAmount: amount,
+                                items: _items
+                                    .map(
+                                      (e) => ExpenseItem(
+                                        name: e['name'],
+                                        amount: e['amount'],
+                                      ),
+                                    )
+                                    .toList(),
+                                date: _selectedDate,
+                                category: _selectedCategory,
+                                description: _descriptionController.text.trim(),
+                                notes: _notesController.text.trim(),
+                              ),
+                            );
+
+                        if (!context.mounted) {
+                          return;
+                        }
+                        showCustomSnackBar(
+                          context: context,
+                          message: 'Expense saved successfully!',
+                          type: SnackBarType.success,
+                        );
+                        Navigator.pop(context);
+                      } catch (e) {
+                        if (mounted) {
+                          showCustomSnackBar(
+                            context: context,
+                            message: 'Error: ${e.toString()}',
+                            type: SnackBarType.failure,
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isLoading = false);
+                        }
+                      }
+                    }
                   },
                 ),
                 const SizedBox(height: 32),

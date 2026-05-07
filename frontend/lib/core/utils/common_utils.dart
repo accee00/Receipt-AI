@@ -15,4 +15,19 @@ class CommonUtils {
     'Travel': (Icons.flight_takeoff_rounded, Color(0xFF26A69A)),
     'Other': (Icons.more_horiz_rounded, Color(0xFF78909C)),
   };
+
+  static const List<String> months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
 }
