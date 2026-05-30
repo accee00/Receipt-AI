@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/features/auth/viewmodel/auth_view_model.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,9 +18,9 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
       next.whenOrNull(
         data: (user) {
           if (user != null) {
-            context.go("/home");
+            context.go(AppRoutes.home);
           } else {
-            context.go("/login");
+            context.go(AppRoutes.login);
           }
         },
       );

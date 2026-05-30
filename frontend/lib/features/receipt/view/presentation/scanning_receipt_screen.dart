@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
@@ -53,7 +54,7 @@ class _ScanningReceiptScreenState extends ConsumerState<ScanningReceiptScreen>
     ref.listen(scanReceiptViewModelProvider, (previous, next) {
       if (!next.isLoading && !next.hasError && next.value != null) {
         context.pushReplacement(
-          '/scan-confirmation',
+          AppRoutes.scanConfirmation,
           extra: {
             'extractedData': next.value!,
             'imageUrl': next.value!.receiptImageUrl,
@@ -166,7 +167,7 @@ class _ScanningReceiptScreenState extends ConsumerState<ScanningReceiptScreen>
                   child: OutlinedButton(
                     onPressed: () {
                       _cancelToken.cancel("User cancelled scan");
-                      Navigator.pop(context);
+                      context.pop();
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(

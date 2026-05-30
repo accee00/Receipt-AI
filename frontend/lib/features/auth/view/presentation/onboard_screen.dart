@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
-import 'package:frontend/features/auth/view/presentation/login_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/features/auth/view/widgets/dot_indicator.dart';
 import 'package:frontend/features/auth/view/widgets/onboard_page.dart';
 import 'package:frontend/features/auth/view/widgets/onboard_page_view.dart';
@@ -90,15 +91,7 @@ class _OnboardScreenState extends State<OnboardScreen>
   }
 
   void _goToLogin() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (ctx, anim1, anim2) => const LoginScreen(),
-        transitionsBuilder: (ctx, animation, anim2, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        transitionDuration: const Duration(milliseconds: 400),
-      ),
-    );
+    context.go(AppRoutes.login);
   }
 
   @override

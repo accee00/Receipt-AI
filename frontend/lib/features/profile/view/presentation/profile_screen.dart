@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/features/auth/viewmodel/auth_view_model.dart';
@@ -96,7 +97,7 @@ class ProfileScreen extends ConsumerWidget {
                 onPressed: () async {
                   await ref.read(authViewModelProvider.notifier).logOutUser();
                   if (context.mounted) {
-                    context.go('/login');
+                    context.go(AppRoutes.login);
                   }
                 },
                 icon: const Icon(Icons.logout, color: AppColors.error),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/features/ai-chat/view/presentation/ai_chat_screen.dart';
 import 'package:frontend/features/home/view/presentation/dashboard_screen.dart';
-import 'package:frontend/features/receipt/view/presentation/add_expense_selection_screen.dart';
 import 'package:frontend/features/receipt/view/presentation/receipt_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/features/profile/view/presentation/profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -46,14 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       extendBody: true,
       floatingActionButton: _currentIndex == 1
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddExpenseSelectionScreen(),
-                  ),
-                );
-              },
+              onPressed: () => context.push(AppRoutes.addExpense),
               backgroundColor: AppColors.primary,
               child: const Icon(Icons.add, color: Colors.white, size: 30),
             )

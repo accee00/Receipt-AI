@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/utils/common_utils.dart';
 import 'package:frontend/features/receipt/model/dashboard_model.dart';
-import 'package:frontend/features/receipt/view/presentation/ai_insights_screen.dart';
 import 'package:frontend/features/receipt/view/widget/custom_expense_card.dart';
 import 'package:frontend/features/home/viewmodel/dashboard_view_model.dart';
 import 'package:frontend/core/widgets/custom_month_strip.dart';
@@ -145,17 +146,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
           // AI Insights Section
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AiInsightsScreen(
-                    month: _selectedMonth,
-                    year: _selectedYear,
-                  ),
-                ),
-              );
-            },
+            onTap: () => context.push(
+              AppRoutes.aiInsightsWith(
+                month: _selectedMonth,
+                year: _selectedYear,
+              ),
+            ),
             child: Column(
               children: [
                 Row(
@@ -176,6 +172,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
                 const SizedBox(height: 10),
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.darkCard : Colors.white,

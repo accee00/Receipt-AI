@@ -172,15 +172,16 @@ class AiInsightsScreen extends ConsumerWidget {
         _buildSectionHeader(context, 'AI Analysis', Icons.auto_awesome_rounded),
         const SizedBox(height: 12),
         Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+              color: AppColors.primary.withValues(alpha: 0.2),
+              width: 1.5,
             ),
           ),
+
           child: Text(
             insights.insights,
             style: context.textTheme.bodyLarge?.copyWith(

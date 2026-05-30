@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
@@ -103,8 +105,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
               message: 'Account created successfully!',
               type: SnackBarType.success,
             );
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
+            if (context.canPop()) {
+              context.pop();
             }
           }
         },
@@ -155,7 +157,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
                             CircleIconButton(
                               icon: Icons.arrow_back_ios_new_rounded,
                               isDark: isDark,
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () => context.pop(),
                             ),
                           ],
                         ),
@@ -302,7 +304,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
                                     fontWeight: FontWeight.w600,
                                   ),
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap = () => Navigator.of(context).pop(),
+                                    ..onTap = () => context.pop(),
                                 ),
                               ],
                             ),

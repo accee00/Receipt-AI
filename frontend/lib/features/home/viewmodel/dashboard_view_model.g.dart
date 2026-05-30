@@ -20,7 +20,7 @@ final class DashboardViewModelProvider
   }) : super(
          retry: null,
          name: r'dashboardViewModelProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -51,7 +51,7 @@ final class DashboardViewModelProvider
 }
 
 String _$dashboardViewModelHash() =>
-    r'22f6dca6deeab06f58a76798a843f0fba33cf030';
+    r'df0595b3cede2de8587961e0bcb724936d61e9f0';
 
 final class DashboardViewModelFamily extends $Family
     with
@@ -68,7 +68,7 @@ final class DashboardViewModelFamily extends $Family
         name: r'dashboardViewModelProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   DashboardViewModelProvider call({int? month, int? year}) =>

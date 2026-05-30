@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/utils/image_picker.dart';
@@ -67,11 +68,8 @@ class AddExpenseSelectionScreen extends StatelessWidget {
                                   if (!context.mounted) {
                                     return;
                                   }
-                                  Navigator.pop(context);
-                                  context.push(
-                                    '/scanning-receipt',
-                                    extra: file,
-                                  );
+                                  context.pop();
+                                  context.push(AppRoutes.scanningReceipt, extra: file);
                                 }
                               },
                             ),
@@ -86,11 +84,8 @@ class AddExpenseSelectionScreen extends StatelessWidget {
                                   if (!context.mounted) {
                                     return;
                                   }
-                                  Navigator.pop(context);
-                                  context.push(
-                                    '/scanning-receipt',
-                                    extra: file,
-                                  );
+                                  context.pop();
+                                  context.push(AppRoutes.scanningReceipt, extra: file);
                                 }
                               },
                             ),
@@ -111,7 +106,7 @@ class AddExpenseSelectionScreen extends StatelessWidget {
                 subtitle: 'Type in the details yourself',
                 isPrimary: false,
                 onTap: () {
-                  context.push('/add-manual-expense');
+                  context.push(AppRoutes.addManualExpense);
                 },
               ),
             ],

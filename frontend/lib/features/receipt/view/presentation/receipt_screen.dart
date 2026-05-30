@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/utils/common_utils.dart';
+import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:frontend/core/widgets/custom_dialog.dart';
 import 'package:frontend/core/widgets/custom_month_strip.dart';
-import 'package:frontend/features/receipt/view/presentation/ai_insights_screen.dart';
+import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/view/widget/custom_expense_card.dart';
 import 'package:frontend/features/receipt/view/widget/custom_filter_tab.dart';
 import 'package:frontend/features/receipt/view/widget/custom_search_bar.dart';
+import 'package:frontend/features/receipt/viewmodel/delete_expense_view_model.dart';
 import 'package:frontend/features/receipt/viewmodel/get_and_filter_expense_viewmodel.dart';
 
 class ReceptScreen extends ConsumerStatefulWidget {
@@ -103,9 +107,33 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDark;
-    final textTheme = context.textTheme;
-    final expensesAsync = ref.watch(expensesProvider);
+    final bool isDark = context.isDark;
+    final TextTheme textTheme = context.textTheme;
+    final AsyncValue<List<ExpenseModel>> expensesAsync = ref.watch(
+      expensesProvider,
+    );
+
+    ref.listen(
+      deleteExpenseProvider,
+      ((previous, next) => next.whenOrNull(
+        error: (error, stackTrace) {
+          if (previous?.isLoading ?? false) {
+            showCustomSnackBar(
+              context: context,
+              message: error.toString(),
+              type: SnackBarType.failure,
+            );
+          }
+        },
+        data: (_) {
+          showCustomSnackBar(
+            context: context,
+            message: 'Expense deleted successfully!',
+            type: SnackBarType.success,
+          );
+        },
+      )),
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -297,9 +325,9 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
         content: 'This action cannot be undone.',
         cancelText: 'Cancel',
         confirmText: 'Delete',
-        onCancel: () => Navigator.pop(context),
+        onCancel: () => context.pop(),
         onConfirm: () {
-          // ref.read(expenseViewModelProvider.notifier).deleteExpense(id);
+          ref.read(deleteExpenseProvider.notifier).deleteExpense(id);
         },
       ),
     );
@@ -307,15 +335,9 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
 
   GestureDetector _aiInsightsButton(TextTheme textTheme) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                AiInsightsScreen(month: _selectedMonth, year: _selectedYear),
-          ),
-        );
-      },
+      onTap: () => context.push(
+        AppRoutes.aiInsightsWith(month: _selectedMonth, year: _selectedYear),
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(

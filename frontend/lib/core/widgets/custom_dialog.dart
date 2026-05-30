@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 
 class CustomDialog extends StatelessWidget {
@@ -84,7 +85,7 @@ class CustomDialog extends StatelessWidget {
         TextButton(
           onPressed: () {
             onConfirm();
-            Navigator.pop(context);
+            context.pop();
           },
           style: TextButton.styleFrom(
             backgroundColor: actionColor,

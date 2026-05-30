@@ -6,7 +6,7 @@ import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
-import 'package:frontend/features/auth/view/presentation/signup_screen.dart';
+import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/features/auth/view/widgets/brand_header.dart';
 import 'package:frontend/features/auth/view/widgets/or_divider.dart';
 import 'package:frontend/features/auth/viewmodel/auth_view_model.dart';
@@ -87,7 +87,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               type: SnackBarType.success,
             );
           }
-          context.pushReplacement("/home");
+          context.go(AppRoutes.home);
         },
       );
     });
@@ -229,13 +229,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     fontWeight: FontWeight.w600,
                                   ),
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) => const SignupScreen(),
-                                        ),
-                                      );
-                                    },
+                                    ..onTap = () => context.push(AppRoutes.signup),
                                 ),
                               ],
                             ),

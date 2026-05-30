@@ -13,7 +13,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      key: GoRoutes.navigatorKey,
       title: 'Receipt AI',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,

@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'dashboard_view_model.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class DashboardViewModel extends _$DashboardViewModel {
   @override
   FutureOr<DashboardModel> build({int? month, int? year}) async {

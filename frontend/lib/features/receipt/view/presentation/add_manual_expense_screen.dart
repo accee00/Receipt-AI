@@ -101,7 +101,9 @@ class _AddManualExpenseScreenState
             message: 'Expense saved successfully!',
             type: SnackBarType.success,
           );
-          context.pop();
+          context
+            ..pop()
+            ..pop();
         },
       );
     });
