@@ -71,42 +71,6 @@ const getDashboardData = asyncHandler(async (req, res) => {
     );
 });
 
-const addExpense = asyncHandler(async (req, res) => {
-    const { merchant, items, category, description, notes, receiptImage, date, totalAmount: bodyTotalAmount } = req.body || {};
-
-    if (!merchant?.trim() || !category?.trim()) {
-        throw new ApiError({ statusCode: 400, message: "Merchant and category are required" });
-    }
-
-
-    const totalAmount = items && items.length > 0
-        ? items.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
-        : (Number(bodyTotalAmount) || 0);
-
-    const expense = await Expense.create({
-        merchant,
-        totalAmount,
-        items: (items || []).map(item => ({
-            name: item.name,
-            amount: Number(item.amount) || 0
-        })),
-        date: date ? new Date(date) : new Date(),
-        category,
-        description,
-        notes,
-        receiptImage,
-        user: req.user._id,
-    });
-
-    return res.status(201).json(
-        new ApiResponse({
-            statusCode: 201,
-            message: "Expense saved successfully",
-            data: expense,
-        })
-    );
-});
-
 const scanReceiptImage = asyncHandler(async (req, res) => {
     const receiptImage = req.file?.path;
     if (!receiptImage) {
@@ -207,6 +171,42 @@ const getExpenseByMonthOrCategory = asyncHandler(async (req, res) => {
                     hasPrevPage: result.hasPrevPage
                 },
             },
+        })
+    );
+});
+
+const addExpense = asyncHandler(async (req, res) => {
+    const { merchant, items, category, description, notes, receiptImage, date, totalAmount: bodyTotalAmount } = req.body || {};
+
+    if (!merchant?.trim() || !category?.trim()) {
+        throw new ApiError({ statusCode: 400, message: "Merchant and category are required" });
+    }
+
+
+    const totalAmount = items && items.length > 0
+        ? items.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
+        : (Number(bodyTotalAmount) || 0);
+
+    const expense = await Expense.create({
+        merchant,
+        totalAmount,
+        items: (items || []).map(item => ({
+            name: item.name,
+            amount: Number(item.amount) || 0
+        })),
+        date: date ? new Date(date) : new Date(),
+        category,
+        description,
+        notes,
+        receiptImage,
+        user: req.user._id,
+    });
+
+    return res.status(201).json(
+        new ApiResponse({
+            statusCode: 201,
+            message: "Expense saved successfully",
+            data: expense,
         })
     );
 });

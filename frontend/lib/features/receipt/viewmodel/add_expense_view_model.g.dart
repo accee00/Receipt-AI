@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'add_view_model.dart';
+part of 'add_expense_view_model.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -33,7 +33,7 @@ final class AddExpenseProvider
   AddExpense create() => AddExpense();
 }
 
-String _$addExpenseHash() => r'9ae78234f563ee280a6a289fb7b648ed9c116c81';
+String _$addExpenseHash() => r'4c3e28cc886513a1a9f5153a92a97874664f6a6c';
 
 abstract class _$AddExpense extends $AsyncNotifier<void> {
   FutureOr<void> build();

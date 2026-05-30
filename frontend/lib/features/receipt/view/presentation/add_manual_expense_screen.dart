@@ -6,7 +6,7 @@ import 'package:frontend/core/utils/common_utils.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
 import 'package:frontend/features/receipt/model/expense_model.dart';
-import 'package:frontend/features/receipt/viewmodel/add_view_model.dart';
+import 'package:frontend/features/receipt/viewmodel/add_expense_view_model.dart';
 import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:go_router/go_router.dart';
 

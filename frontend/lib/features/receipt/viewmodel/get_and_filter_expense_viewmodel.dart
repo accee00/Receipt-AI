@@ -2,7 +2,7 @@ import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/repository/expense_repo.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'expense_view_model.g.dart';
+part 'get_and_filter_expense_viewmodel.g.dart';
 
 @Riverpod(keepAlive: true)
 class Expenses extends _$Expenses {

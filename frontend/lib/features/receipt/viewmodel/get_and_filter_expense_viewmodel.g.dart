@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'expense_view_model.dart';
+part of 'get_and_filter_expense_viewmodel.dart';
 
 // **************************************************************************
 // RiverpodGenerator

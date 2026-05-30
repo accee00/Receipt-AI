@@ -10,7 +10,7 @@ import 'package:frontend/features/receipt/view/presentation/ai_insights_screen.d
 import 'package:frontend/features/receipt/view/widget/custom_expense_card.dart';
 import 'package:frontend/features/receipt/view/widget/custom_filter_tab.dart';
 import 'package:frontend/features/receipt/view/widget/custom_search_bar.dart';
-import 'package:frontend/features/receipt/viewmodel/expense_view_model.dart';
+import 'package:frontend/features/receipt/viewmodel/get_and_filter_expense_viewmodel.dart';
 
 class ReceptScreen extends ConsumerStatefulWidget {
   const ReceptScreen({super.key});

@@ -70,42 +70,6 @@ class ExpenseRepo {
     }
   }
 
-  Future<Either<Failure, Unit>> addExpense(ExpenseModel expense) async {
-    try {
-      final ApiResponse<Map<String, dynamic>> response = await dioClient.post(
-        "expenses/add-expense",
-        data: expense.toJson(),
-      );
-
-      final data = response.data;
-      if (data != null) {
-        return right(unit);
-      }
-      return left(Failure("Failed to save expense"));
-    } on Failure catch (e) {
-      return left(e);
-    } catch (e) {
-      return left(Failure(e.toString()));
-    }
-  }
-
-  Future<Either<Failure, Unit>> deleteExpense({
-    required String expenseId,
-  }) async {
-    try {
-      final ApiResponse<Map<String, dynamic>> response = await dioClient.delete(
-        "expenses/$expenseId",
-      );
-      final data = response.data;
-      if (data != null) {
-        return right(unit);
-      }
-      return left(Failure("Failed to delete expense"));
-    } on Failure catch (e) {
-      return left(e);
-    }
-  }
-
   Future<Either<Failure, ScanResultModel>> scanReceipt(
     String filePath,
     CancelToken? cancelToken,
@@ -154,11 +118,11 @@ class ExpenseRepo {
         queryParameters['endDate'] = endDate.toIso8601String();
       }
 
-      final ApiResponse<Map<String, dynamic>> response =
-          await dioClient.get<Map<String, dynamic>>(
-        "expenses/dashboard",
-        queryParameters: queryParameters,
-      );
+      final ApiResponse<Map<String, dynamic>> response = await dioClient
+          .get<Map<String, dynamic>>(
+            "expenses/dashboard",
+            queryParameters: queryParameters,
+          );
 
       final data = response.data;
       if (data != null) {
@@ -177,11 +141,11 @@ class ExpenseRepo {
     required int year,
   }) async {
     try {
-      final ApiResponse<Map<String, dynamic>> response =
-          await dioClient.get<Map<String, dynamic>>(
-        "expenses/insights",
-        queryParameters: {"month": month, "year": year},
-      );
+      final ApiResponse<Map<String, dynamic>> response = await dioClient
+          .get<Map<String, dynamic>>(
+            "expenses/insights",
+            queryParameters: {"month": month, "year": year},
+          );
 
       final data = response.data;
       if (data != null) {
@@ -192,6 +156,59 @@ class ExpenseRepo {
       return left(e);
     } catch (e) {
       return left(Failure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, Unit>> addExpense(ExpenseModel expense) async {
+    try {
+      final ApiResponse<Map<String, dynamic>> response = await dioClient.post(
+        "expenses/add-expense",
+        data: expense.toJson(),
+      );
+
+      final data = response.data;
+      if (data != null) {
+        return right(unit);
+      }
+      return left(Failure("Failed to save expense"));
+    } on Failure catch (e) {
+      return left(e);
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, Unit>> deleteExpense({
+    required String expenseId,
+  }) async {
+    try {
+      final ApiResponse<Map<String, dynamic>> response = await dioClient.delete(
+        "expenses/$expenseId",
+      );
+      final data = response.data;
+      if (data != null) {
+        return right(unit);
+      }
+      return left(Failure("Failed to delete expense"));
+    } on Failure catch (e) {
+      return left(e);
+    }
+  }
+
+  Future<Either<Failure, ExpenseModel>> updateExpense(
+    ExpenseModel expense,
+  ) async {
+    try {
+      final ApiResponse<Map<String, dynamic>> response = await dioClient.put(
+        "expenses/${expense.id}",
+      );
+      final data = response.data;
+      if (data != null) {
+        return right(ExpenseModel.fromJson(data));
+      }
+      return left(Failure("Failed to update expense"));
+    } on Failure catch (e) {
+      return left(e);
     }
   }
 }
