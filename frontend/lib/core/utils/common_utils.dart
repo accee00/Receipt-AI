@@ -30,4 +30,15 @@ class CommonUtils {
     'November',
     'December',
   ];
+
+  static const List<String> categories = [
+    'food',
+    'transport',
+    'shopping',
+    'health',
+    'entertainment',
+    'utilities',
+    'travel',
+    'other',
+  ];
 }

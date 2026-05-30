@@ -13,11 +13,11 @@ class DashboardViewModel extends _$DashboardViewModel {
 
   Future<DashboardModel> _fetchData({int? month, int? year}) async {
     final expenseRepo = ref.read(expenseRepoProvider);
-    
+
     final now = DateTime.now();
     final targetMonth = month ?? now.month;
     final targetYear = year ?? now.year;
-    
+
     final startDate = DateTime(targetYear, targetMonth, 1);
     final endDate = DateTime(targetYear, targetMonth + 1, 0, 23, 59, 59);
 
@@ -25,11 +25,8 @@ class DashboardViewModel extends _$DashboardViewModel {
       startDate: startDate,
       endDate: endDate,
     );
-    
-    return response.fold(
-      (failure) => throw failure.message,
-      (data) => data,
-    );
+
+    return response.fold((failure) => throw failure.message, (data) => data);
   }
 
   Future<void> refresh({int? month, int? year}) async {

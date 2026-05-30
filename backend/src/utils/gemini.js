@@ -92,7 +92,7 @@ Extraction Rules:
         console.log(json);
         return {
             merchant: json.merchant || "Unknown Merchant",
-            total: Number(json.total) || 0.0,
+            totalAmount: parseFloat(json.totalAmount ?? 0),
             items: items,
             category: category,
             date: date,

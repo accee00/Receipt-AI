@@ -6,7 +6,7 @@ import 'package:frontend/core/utils/common_utils.dart';
 import 'package:frontend/features/receipt/model/dashboard_model.dart';
 import 'package:frontend/features/receipt/view/presentation/ai_insights_screen.dart';
 import 'package:frontend/features/receipt/view/widget/custom_expense_card.dart';
-import 'package:frontend/features/receipt/viewmodel/dashboard_view_model.dart';
+import 'package:frontend/features/home/viewmodel/dashboard_view_model.dart';
 import 'package:frontend/core/widgets/custom_month_strip.dart';
 import 'package:frontend/features/home/view/widgets/summary_card.dart';
 

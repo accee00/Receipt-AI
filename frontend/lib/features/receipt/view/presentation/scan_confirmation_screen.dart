@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
+import 'package:frontend/core/utils/common_utils.dart';
+import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
 
 import 'package:frontend/features/receipt/model/scan_result_model.dart';
+import 'package:go_router/go_router.dart';
 
 class ScanConfirmationScreen extends ConsumerStatefulWidget {
   final ScanResultModel extractedData;
@@ -42,10 +45,51 @@ class _ScanConfirmationScreenState
     _items = widget.extractedData.items.map((e) => e.toJson()).toList();
   }
 
+  void showFullScreenImage(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                panEnabled: true,
+                scaleEnabled: true,
+                minScale: 1.0,
+                maxScale: 8.0,
+                boundaryMargin: const EdgeInsets.all(double.infinity),
+                child: Image.network(widget.imageUrl, fit: BoxFit.contain),
+              ),
+            ),
+            SafeArea(
+              child: IconButton(
+                color: Colors.white,
+                icon: const Icon(Icons.close),
+                onPressed: () => context.pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> saveExpense(BuildContext context) async {
+    if (_items.isEmpty) {
+      showCustomSnackBar(
+        context: context,
+        message: 'No item is present in the bill',
+        type: SnackBarType.failure,
+      );
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDark;
-    final textTheme = context.textTheme;
+    final bool isDark = context.isDark;
+    final TextTheme textTheme = context.textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -66,34 +110,17 @@ class _ScanConfirmationScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Receipt Preview
-              Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  image: DecorationImage(
-                    image: NetworkImage(widget.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
+              GestureDetector(
+                onTap: () => showFullScreenImage(context),
                 child: Container(
+                  height: 300,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.5),
-                      ],
+                    image: DecorationImage(
+                      image: NetworkImage(widget.imageUrl),
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  alignment: Alignment.bottomRight,
-                  padding: const EdgeInsets.all(12),
-                  child: const Icon(Icons.zoom_in, color: Colors.white),
                 ),
               ),
               const SizedBox(height: 32),
@@ -116,6 +143,12 @@ class _ScanConfirmationScreenState
                 labelText: 'Merchant',
                 hintText: 'Enter merchant name',
                 prefixIcon: const Icon(Icons.storefront_rounded),
+                validator: (v) {
+                  if (v == null || v.isEmpty) {
+                    return 'Please enter a merchant name';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
@@ -132,54 +165,30 @@ class _ScanConfirmationScreenState
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Category', style: textTheme.bodySmall),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.darkCard
-                                : AppColors.lightBackground,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isDark
-                                  ? AppColors.darkBorder
-                                  : AppColors.lightBorder,
-                            ),
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _selectedCategory,
+                      decoration: const InputDecoration(
+                        labelText: 'Category',
+                        prefixIcon: Icon(Icons.category_rounded),
+                      ),
+                      items: CommonUtils.categories.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value[0].toUpperCase() + value.substring(1),
                           ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _selectedCategory,
-                              isExpanded: true,
-                              items:
-                                  [
-                                    'food',
-                                    'transport',
-                                    'shopping',
-                                    'health',
-                                    'entertainment',
-                                    'utilities',
-                                    'travel',
-                                    'other',
-                                  ].map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                              onChanged: (v) =>
-                                  setState(() => _selectedCategory = v!),
-                            ),
-                          ),
-                        ),
-                      ],
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() => _selectedCategory = newValue);
+                        }
+                      },
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 24),
 
               Text(
@@ -214,16 +223,10 @@ class _ScanConfirmationScreenState
                 },
               ),
 
-              const SizedBox(height: 40),
-              AppGradientButton(
-                label: 'Confirm & Save',
-                onPressed: () {
-                  // Save logic
-                },
-              ),
+              AppGradientButton(label: 'Confirm & Save', onPressed: () {}),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => context.pop(),
                 child: const Text(
                   'Discard Scan',
                   style: TextStyle(color: AppColors.error),

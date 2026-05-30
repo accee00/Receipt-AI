@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
+import 'package:frontend/core/utils/common_utils.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
 import 'package:frontend/features/receipt/model/expense_model.dart';
-import 'package:frontend/features/receipt/viewmodel/expense_view_model.dart';
+import 'package:frontend/features/receipt/viewmodel/add_view_model.dart';
 import 'package:frontend/core/utils/custom_snackbar.dart';
+import 'package:go_router/go_router.dart';
 
 class AddManualExpenseScreen extends ConsumerStatefulWidget {
   const AddManualExpenseScreen({super.key});
@@ -18,27 +20,45 @@ class AddManualExpenseScreen extends ConsumerStatefulWidget {
 
 class _AddManualExpenseScreenState
     extends ConsumerState<AddManualExpenseScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _merchantController = TextEditingController();
-  final _amountController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _notesController = TextEditingController();
-  bool _isLoading = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _merchantController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = 'food';
 
   final List<Map<String, dynamic>> _items = [];
-  final List<String> _categories = [
-    'food',
-    'transport',
-    'shopping',
-    'health',
-    'entertainment',
-    'utilities',
-    'travel',
-    'other',
-  ];
+
+  Future<void> saveExpense(BuildContext context) async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_items.isEmpty) {
+        showCustomSnackBar(
+          context: context,
+          message: 'Please add at least one item',
+          type: SnackBarType.failure,
+        );
+        return;
+      }
+
+      final amount = _calculatedTotal;
+      final ExpenseModel expenseToAdd = ExpenseModel(
+        id: "",
+        merchant: _merchantController.text.trim(),
+        totalAmount: amount,
+        items: _items
+            .map((e) => ExpenseItem(name: e['name'], amount: e['amount']))
+            .toList(),
+        date: _selectedDate,
+        category: _selectedCategory,
+        description: _descriptionController.text.trim(),
+        notes: _notesController.text.trim(),
+      );
+
+      ref.read(addExpenseProvider.notifier).addExpense(expenseToAdd);
+    }
+  }
 
   @override
   void dispose() {
@@ -66,6 +86,26 @@ class _AddManualExpenseScreenState
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(addExpenseProvider, (previous, next) {
+      next.whenOrNull(
+        error: (error, stackTrace) {
+          showCustomSnackBar(
+            context: context,
+            message: error.toString(),
+            type: SnackBarType.failure,
+          );
+        },
+        data: (_) {
+          showCustomSnackBar(
+            context: context,
+            message: 'Expense saved successfully!',
+            type: SnackBarType.success,
+          );
+          context.pop();
+        },
+      );
+    });
+
     final isDark = context.isDark;
     final textTheme = context.textTheme;
 
@@ -131,7 +171,7 @@ class _AddManualExpenseScreenState
                           labelText: 'Category',
                           prefixIcon: Icon(Icons.category_rounded),
                         ),
-                        items: _categories.map((String value) {
+                        items: CommonUtils.categories.map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(
@@ -261,67 +301,7 @@ class _AddManualExpenseScreenState
 
                 AppGradientButton(
                   label: 'Save Expense',
-                  isLoading: _isLoading,
-                  onPressed: () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      if (_items.isEmpty) {
-                        showCustomSnackBar(
-                          context: context,
-                          message: 'Please add at least one item',
-                          type: SnackBarType.failure,
-                        );
-                        return;
-                      }
-
-                      setState(() => _isLoading = true);
-                      try {
-                        final amount = _calculatedTotal;
-                        await ref
-                            .read(expenseViewModelProvider.notifier)
-                            .addExpense(
-                              ExpenseModel(
-                                id: "",
-                                merchant: _merchantController.text.trim(),
-                                totalAmount: amount,
-                                items: _items
-                                    .map(
-                                      (e) => ExpenseItem(
-                                        name: e['name'],
-                                        amount: e['amount'],
-                                      ),
-                                    )
-                                    .toList(),
-                                date: _selectedDate,
-                                category: _selectedCategory,
-                                description: _descriptionController.text.trim(),
-                                notes: _notesController.text.trim(),
-                              ),
-                            );
-
-                        if (!context.mounted) {
-                          return;
-                        }
-                        showCustomSnackBar(
-                          context: context,
-                          message: 'Expense saved successfully!',
-                          type: SnackBarType.success,
-                        );
-                        Navigator.pop(context);
-                      } catch (e) {
-                        if (mounted) {
-                          showCustomSnackBar(
-                            context: context,
-                            message: 'Error: ${e.toString()}',
-                            type: SnackBarType.failure,
-                          );
-                        }
-                      } finally {
-                        if (mounted) {
-                          setState(() => _isLoading = false);
-                        }
-                      }
-                    }
-                  },
+                  onPressed: () => saveExpense(context),
                 ),
                 const SizedBox(height: 32),
               ],

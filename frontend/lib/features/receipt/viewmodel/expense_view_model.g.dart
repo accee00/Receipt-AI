@@ -9,33 +9,33 @@ part of 'expense_view_model.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(ExpenseViewModel)
-final expenseViewModelProvider = ExpenseViewModelProvider._();
+@ProviderFor(Expenses)
+final expensesProvider = ExpensesProvider._();
 
-final class ExpenseViewModelProvider
-    extends $AsyncNotifierProvider<ExpenseViewModel, List<ExpenseModel>> {
-  ExpenseViewModelProvider._()
+final class ExpensesProvider
+    extends $AsyncNotifierProvider<Expenses, List<ExpenseModel>> {
+  ExpensesProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'expenseViewModelProvider',
+        name: r'expensesProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$expenseViewModelHash();
+  String debugGetCreateSourceHash() => _$expensesHash();
 
   @$internal
   @override
-  ExpenseViewModel create() => ExpenseViewModel();
+  Expenses create() => Expenses();
 }
 
-String _$expenseViewModelHash() => r'b57499f0d88ab7eabb86b0d06f4aa7086c65dfd8';
+String _$expensesHash() => r'20854618dcbc4f79ab3cdb54c246b31684b04108';
 
-abstract class _$ExpenseViewModel extends $AsyncNotifier<List<ExpenseModel>> {
+abstract class _$Expenses extends $AsyncNotifier<List<ExpenseModel>> {
   FutureOr<List<ExpenseModel>> build();
   @$mustCallSuper
   @override

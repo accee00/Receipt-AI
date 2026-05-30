@@ -82,7 +82,7 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
 
   void _applyFilters() {
     ref
-        .read(expenseViewModelProvider.notifier)
+        .read(expensesProvider.notifier)
         .filterExpenses(
           category: _selectedCategory == 'All'
               ? null
@@ -105,7 +105,7 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
   Widget build(BuildContext context) {
     final isDark = context.isDark;
     final textTheme = context.textTheme;
-    final expensesAsync = ref.watch(expenseViewModelProvider);
+    final expensesAsync = ref.watch(expensesProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
