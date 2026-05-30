@@ -5,7 +5,6 @@ class ExpenseModel {
   final List<ExpenseItem> items;
   final DateTime date;
   final String category;
-  final String? description;
   final String? notes;
   final String? receiptImage;
 
@@ -16,7 +15,6 @@ class ExpenseModel {
     required this.items,
     required this.date,
     required this.category,
-    this.description,
     this.notes,
     this.receiptImage,
   });
@@ -31,20 +29,18 @@ class ExpenseModel {
           .toList(),
       date: DateTime.parse(json['date'] as String),
       category: json['category'] ?? 'other',
-      description: json['description'],
       notes: json['notes'],
       receiptImage: json['receiptImage'],
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJsonForAdd() {
     return {
       'merchant': merchant,
       'totalAmount': totalAmount,
       'items': items.map((item) => item.toJson()).toList(),
       'date': date.toIso8601String(),
       'category': category,
-      'description': description,
       'notes': notes,
       'receiptImage': receiptImage,
     };

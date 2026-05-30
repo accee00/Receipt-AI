@@ -298,6 +298,9 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
                         textTheme: textTheme,
                         accentColor: meta.$2,
                         icon: meta.$1,
+                        onTap: () {
+                          context.push(AppRoutes.expenseDetail, extra: expense);
+                        },
                       ),
                     );
                   },
@@ -336,7 +339,8 @@ class _ReceptScreenState extends ConsumerState<ReceptScreen>
   GestureDetector _aiInsightsButton(TextTheme textTheme) {
     return GestureDetector(
       onTap: () => context.push(
-        AppRoutes.aiInsightsWith(month: _selectedMonth, year: _selectedYear),
+        AppRoutes.aiInsights,
+        extra: AiInsightsRouteArgs(month: _selectedMonth, year: _selectedYear),
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

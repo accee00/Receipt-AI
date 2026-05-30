@@ -6,8 +6,11 @@ import 'package:frontend/core/utils/common_utils.dart';
 import 'package:frontend/core/utils/custom_snackbar.dart';
 import 'package:frontend/core/widgets/app_gradient_button.dart';
 import 'package:frontend/core/widgets/app_text_field.dart';
+import 'package:frontend/core/widgets/full_screen_image_viewer.dart';
+import 'package:frontend/features/receipt/model/expense_model.dart';
 
 import 'package:frontend/features/receipt/model/scan_result_model.dart';
+import 'package:frontend/features/receipt/viewmodel/add_expense_view_model.dart';
 import 'package:go_router/go_router.dart';
 
 class ScanConfirmationScreen extends ConsumerStatefulWidget {
@@ -27,10 +30,11 @@ class ScanConfirmationScreen extends ConsumerStatefulWidget {
 
 class _ScanConfirmationScreenState
     extends ConsumerState<ScanConfirmationScreen> {
+  late TextEditingController _notesController;
   late TextEditingController _merchantController;
   late TextEditingController _amountController;
   late String _selectedCategory;
-  late List<Map<String, dynamic>> _items;
+  late List<ExpenseItem> _items;
 
   @override
   void initState() {
@@ -42,37 +46,8 @@ class _ScanConfirmationScreenState
       text: widget.extractedData.totalAmount.toString(),
     );
     _selectedCategory = widget.extractedData.category;
-    _items = widget.extractedData.items.map((e) => e.toJson()).toList();
-  }
-
-  void showFullScreenImage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            Center(
-              child: InteractiveViewer(
-                panEnabled: true,
-                scaleEnabled: true,
-                minScale: 1.0,
-                maxScale: 8.0,
-                boundaryMargin: const EdgeInsets.all(double.infinity),
-                child: Image.network(widget.imageUrl, fit: BoxFit.contain),
-              ),
-            ),
-            SafeArea(
-              child: IconButton(
-                color: Colors.white,
-                icon: const Icon(Icons.close),
-                onPressed: () => context.pop(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    _items = widget.extractedData.items;
+    _notesController = TextEditingController(text: '');
   }
 
   Future<void> saveExpense(BuildContext context) async {
@@ -84,13 +59,46 @@ class _ScanConfirmationScreenState
       );
       return;
     }
+    final ExpenseModel expense = ExpenseModel(
+      id: '',
+      merchant: _merchantController.text.trim(),
+      totalAmount: double.parse(_amountController.text.trim()),
+      items: _items,
+      date: widget.extractedData.date,
+      category: widget.extractedData.category,
+      receiptImage: widget.extractedData.receiptImageUrl,
+      notes: _notesController.text.trim(),
+    );
+
+    ref.read(addExpenseProvider.notifier).addExpense(expense);
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isDark = context.isDark;
     final TextTheme textTheme = context.textTheme;
-
+    ref.listen(
+      addExpenseProvider,
+      ((previous, next) => next.whenOrNull(
+        error: (error, stackTrace) {
+          if (previous?.isLoading ?? false) {
+            showCustomSnackBar(
+              context: context,
+              message: error.toString(),
+              type: SnackBarType.failure,
+            );
+          }
+        },
+        data: (_) {
+          showCustomSnackBar(
+            context: context,
+            message: 'Expense saved successfully!',
+            type: SnackBarType.success,
+          );
+          context.pop();
+        },
+      )),
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -111,7 +119,7 @@ class _ScanConfirmationScreenState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               GestureDetector(
-                onTap: () => showFullScreenImage(context),
+                onTap: () => showFullImage(context, widget.imageUrl),
                 child: Container(
                   height: 300,
                   decoration: BoxDecoration(
@@ -212,9 +220,9 @@ class _ScanConfirmationScreenState
                     ),
                     child: Row(
                       children: [
-                        Expanded(child: Text(_items[index]['name'] ?? 'Item')),
+                        Expanded(child: Text(_items[index].name)),
                         Text(
-                          '\$${_items[index]['amount']}',
+                          '\$${_items[index].amount}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -223,7 +231,17 @@ class _ScanConfirmationScreenState
                 },
               ),
 
-              AppGradientButton(label: 'Confirm & Save', onPressed: () {}),
+              AppTextField(
+                controller: _notesController,
+                labelText: 'Notes',
+                hintText: 'Optional...',
+                maxLines: 2,
+              ),
+              const SizedBox(height: 16),
+              AppGradientButton(
+                label: 'Confirm & Save',
+                onPressed: () => saveExpense(context),
+              ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => context.pop(),

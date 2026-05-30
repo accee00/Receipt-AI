@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/routes/app_routes.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/utils/build_extension.dart';

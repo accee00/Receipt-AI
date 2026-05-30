@@ -8,11 +8,13 @@ import 'package:frontend/features/auth/view/presentation/signup_screen.dart';
 import 'package:frontend/features/auth/view/presentation/splash_screen.dart';
 import 'package:frontend/features/home/view/presentation/home_screen.dart';
 import 'package:frontend/features/receipt/model/scan_result_model.dart';
+import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/view/presentation/add_expense_selection_screen.dart';
 import 'package:frontend/features/receipt/view/presentation/add_manual_expense_screen.dart';
 import 'package:frontend/features/receipt/view/presentation/ai_insights_screen.dart';
 import 'package:frontend/features/receipt/view/presentation/scan_confirmation_screen.dart';
 import 'package:frontend/features/receipt/view/presentation/scanning_receipt_screen.dart';
+import 'package:frontend/features/receipt/view/presentation/expense_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class GoRoutes {
@@ -74,9 +76,15 @@ class GoRoutes {
       GoRoute(
         path: AppRoutes.aiInsights,
         builder: (context, state) {
-          final month = int.parse(state.uri.queryParameters['month']!);
-          final year = int.parse(state.uri.queryParameters['year']!);
-          return AiInsightsScreen(month: month, year: year);
+          final args = state.extra! as AiInsightsRouteArgs;
+          return AiInsightsScreen(month: args.month, year: args.year);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.expenseDetail,
+        builder: (context, state) {
+          final expense = state.extra as ExpenseModel;
+          return ExpenseDetailScreen(expense: expense);
         },
       ),
     ],

@@ -23,7 +23,6 @@ class _AddManualExpenseScreenState
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _merchantController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
@@ -52,7 +51,6 @@ class _AddManualExpenseScreenState
             .toList(),
         date: _selectedDate,
         category: _selectedCategory,
-        description: _descriptionController.text.trim(),
         notes: _notesController.text.trim(),
       );
 
@@ -64,7 +62,6 @@ class _AddManualExpenseScreenState
   void dispose() {
     _merchantController.dispose();
     _amountController.dispose();
-    _descriptionController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -235,9 +232,10 @@ class _AddManualExpenseScreenState
                   ],
                 ),
 
-                if (_items.isEmpty)
-                  Text('No items added yet', style: textTheme.bodySmall)
-                else
+                if (_items.isEmpty) ...[
+                  Text('No items added yet', style: textTheme.bodySmall),
+                  const SizedBox(height: 15),
+                ] else
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -281,16 +279,6 @@ class _AddManualExpenseScreenState
                       );
                     },
                   ),
-
-                const SizedBox(height: 24),
-
-                AppTextField(
-                  controller: _descriptionController,
-                  labelText: 'Description',
-                  hintText: 'Optional...',
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 16),
 
                 AppTextField(
                   controller: _notesController,

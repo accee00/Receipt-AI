@@ -10,6 +10,7 @@ class CustomExpenseCard extends StatelessWidget {
   final TextTheme textTheme;
   final Color accentColor;
   final IconData icon;
+  final VoidCallback? onTap;
 
   const CustomExpenseCard({
     super.key,
@@ -18,126 +19,140 @@ class CustomExpenseCard extends StatelessWidget {
     required this.textTheme,
     required this.accentColor,
     required this.icon,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: isDark
-            ? Border.all(color: AppColors.darkBorder)
-            : Border.all(color: AppColors.lightBorder.withValues(alpha: 0.6)),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          splashColor: AppColors.primary.withValues(alpha: 0.1),
+          highlightColor: AppColors.primary.withValues(alpha: 0.05),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
+              color: isDark ? AppColors.darkCard : Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: isDark
+                  ? Border.all(color: AppColors.darkBorder)
+                  : Border.all(
+                      color: AppColors.lightBorder.withValues(alpha: 0.6),
+                    ),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
             ),
-            child: Icon(icon, color: accentColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  expense.merchant,
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: Icon(icon, color: accentColor, size: 22),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2.5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        capitalize(expense.category),
-                        style: TextStyle(
-                          color: accentColor,
-                          fontSize: 10.5,
+                const SizedBox(width: 14),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        expense.merchant,
+                        style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      size: 10,
-                      color: isDark
-                          ? AppColors.darkTextHint
-                          : AppColors.lightTextHint,
-                    ),
-                    const SizedBox(width: 3),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              capitalize(expense.category),
+                              style: TextStyle(
+                                color: accentColor,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.calendar_today_rounded,
+                            size: 10,
+                            color: isDark
+                                ? AppColors.darkTextHint
+                                : AppColors.lightTextHint,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            DateFormat('MMM d, yyyy').format(expense.date),
+                            style: textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextHint
+                                  : AppColors.lightTextHint,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     Text(
-                      DateFormat('MMM d, yyyy').format(expense.date),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextHint
-                            : AppColors.lightTextHint,
-                        fontSize: 11,
+                      '\$${expense.totalAmount.toStringAsFixed(2)}',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 16,
                       ),
                     ),
+                    if (expense.items.isNotEmpty)
+                      Text(
+                        '${expense.items.length} item${expense.items.length == 1 ? '' : 's'}',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: isDark
+                              ? AppColors.darkTextHint
+                              : AppColors.lightTextHint,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                   ],
                 ),
               ],
             ),
           ),
-
-          const SizedBox(width: 10),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '\$${expense.totalAmount.toStringAsFixed(2)}',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 16,
-                ),
-              ),
-              if (expense.items.isNotEmpty)
-                Text(
-                  '${expense.items.length} item${expense.items.length == 1 ? '' : 's'}',
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color: isDark
-                        ? AppColors.darkTextHint
-                        : AppColors.lightTextHint,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

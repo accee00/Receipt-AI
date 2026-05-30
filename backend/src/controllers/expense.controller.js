@@ -176,7 +176,7 @@ const getExpenseByMonthOrCategory = asyncHandler(async (req, res) => {
 });
 
 const addExpense = asyncHandler(async (req, res) => {
-    const { merchant, items, category, description, notes, receiptImage, date, totalAmount: bodyTotalAmount } = req.body || {};
+    const { merchant, items, category, notes, receiptImage, date, totalAmount: bodyTotalAmount } = req.body || {};
 
     if (!merchant?.trim() || !category?.trim()) {
         throw new ApiError({ statusCode: 400, message: "Merchant and category are required" });
@@ -196,7 +196,6 @@ const addExpense = asyncHandler(async (req, res) => {
         })),
         date: date ? new Date(date) : new Date(),
         category,
-        description,
         notes,
         receiptImage,
         user: req.user._id,
@@ -243,12 +242,11 @@ const getExpense = asyncHandler(async (req, res) => {
 
 const updateExpense = asyncHandler(async (req, res) => {
     const { expenseId } = req.params;
-    const { merchant, items, category, description, notes, date } = req.body || {};
+    const { merchant, items, category, notes, date } = req.body || {};
 
     const updateFields = {};
     if (merchant !== undefined) updateFields.merchant = merchant;
     if (category !== undefined) updateFields.category = category;
-    if (description !== undefined) updateFields.description = description;
     if (notes !== undefined) updateFields.notes = notes;
     if (date !== undefined) updateFields.date = date;
 

@@ -147,7 +147,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           // AI Insights Section
           GestureDetector(
             onTap: () => context.push(
-              AppRoutes.aiInsightsWith(
+              AppRoutes.aiInsights,
+              extra: AiInsightsRouteArgs(
                 month: _selectedMonth,
                 year: _selectedYear,
               ),
@@ -240,6 +241,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 textTheme: textTheme,
                 accentColor: meta.$2,
                 icon: meta.$1,
+                onTap: () {
+                  context.push(AppRoutes.expenseDetail, extra: expense);
+                },
               );
             }),
           const SizedBox(height: 120),

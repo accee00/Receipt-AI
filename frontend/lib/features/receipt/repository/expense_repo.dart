@@ -163,7 +163,7 @@ class ExpenseRepo {
     try {
       final ApiResponse<Map<String, dynamic>> response = await dioClient.post(
         "expenses/add-expense",
-        data: expense.toJson(),
+        data: expense.toJsonForAdd(),
       );
 
       final data = response.data;

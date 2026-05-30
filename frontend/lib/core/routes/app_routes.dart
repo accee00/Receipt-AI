@@ -1,3 +1,10 @@
+class AiInsightsRouteArgs {
+  const AiInsightsRouteArgs({required this.month, required this.year});
+
+  final int month;
+  final int year;
+}
+
 class AppRoutes {
   static const splash = '/';
   static const login = '/login';
@@ -9,7 +16,5 @@ class AppRoutes {
   static const scanningReceipt = '/scanning-receipt';
   static const scanConfirmation = '/scan-confirmation';
   static const aiInsights = '/ai-insights';
-
-  static String aiInsightsWith({required int month, required int year}) =>
-      '$aiInsights?month=$month&year=$year';
+  static const expenseDetail = '/expense-detail';
 }
