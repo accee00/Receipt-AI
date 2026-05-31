@@ -54,8 +54,15 @@ class GoRoutes {
       ),
       GoRoute(
         path: AppRoutes.addManualExpense,
-        builder: (context, state) => const AddManualExpenseScreen(),
+        builder: (context, state) {
+          final expense = state.extra as ExpenseModel?;
+          if (expense != null) {
+            return AddManualExpenseScreen(expense: expense);
+          }
+          return AddManualExpenseScreen();
+        },
       ),
+
       GoRoute(
         path: AppRoutes.scanningReceipt,
         builder: (context, state) {

@@ -201,6 +201,7 @@ class ExpenseRepo {
     try {
       final ApiResponse<Map<String, dynamic>> response = await dioClient.put(
         "expenses/${expense.id}",
+        data: expense.toJsonForUpdate(),
       );
       final data = response.data;
       if (data != null) {
@@ -209,6 +210,8 @@ class ExpenseRepo {
       return left(Failure("Failed to update expense"));
     } on Failure catch (e) {
       return left(e);
+    } catch (e) {
+      return left(Failure(e.toString()));
     }
   }
 }

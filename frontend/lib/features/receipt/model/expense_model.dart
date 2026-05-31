@@ -45,6 +45,16 @@ class ExpenseModel {
       'receiptImage': receiptImage,
     };
   }
+
+  Map<String, dynamic> toJsonForUpdate() {
+    return {
+      'merchant': merchant,
+      'items': items.map((item) => item.toJson()).toList(),
+      'date': date.toIso8601String(),
+      'category': category,
+      'notes': notes,
+    };
+  }
 }
 
 class ExpenseItem {

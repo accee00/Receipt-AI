@@ -212,7 +212,7 @@ const addExpense = asyncHandler(async (req, res) => {
 
 const deleteExpense = asyncHandler(async (req, res) => {
     const { expenseId } = req.params;
-    const expense = await Expense.findByIdAndDelete(expenseId);
+    const expense = await Expense.findOneAndDelete({ _id: expenseId, user: req.user._id });
     if (!expense) {
         throw new ApiError({ statusCode: 404, message: "Expense not found" });
     }
@@ -227,7 +227,8 @@ const deleteExpense = asyncHandler(async (req, res) => {
 
 const getExpense = asyncHandler(async (req, res) => {
     const { expenseId } = req.params;
-    const expense = await Expense.findById(expenseId);
+    const expense = await
+        Expense.findOne({ _id: expenseId, user: req.user._id });
     if (!expense) {
         throw new ApiError({ statusCode: 404, message: "Expense not found" });
     }
@@ -261,8 +262,8 @@ const updateExpense = asyncHandler(async (req, res) => {
         );
     }
 
-    const expense = await Expense.findByIdAndUpdate(
-        expenseId,
+    const expense = await Expense.findOneAndUpdate(
+        { _id: expenseId, user: req.user._id },
         { $set: updateFields },
         {
             new: true,

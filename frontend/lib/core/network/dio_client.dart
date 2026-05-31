@@ -45,8 +45,14 @@ class DioClient {
       return Failure('Request cancelled');
     }
     String errorMessage = e.message ?? 'An unknown error occurred';
-    if (e.response?.data['message'] != null) {
-      errorMessage = e.response!.data['message'];
+    final responseData = e.response?.data;
+    if (responseData is Map<String, dynamic>) {
+      final message = responseData['message'];
+      if (message is String && message.isNotEmpty) {
+        errorMessage = message;
+      }
+    } else if (responseData is String && responseData.isNotEmpty) {
+      errorMessage = responseData;
     }
     return Failure(errorMessage, statusCode: e.response?.statusCode);
   }

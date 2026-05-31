@@ -8,11 +8,12 @@ import 'package:frontend/core/widgets/app_text_field.dart';
 import 'package:frontend/features/receipt/model/expense_model.dart';
 import 'package:frontend/features/receipt/viewmodel/add_expense_view_model.dart';
 import 'package:frontend/core/utils/custom_snackbar.dart';
+import 'package:frontend/features/receipt/viewmodel/update_expense_view_model.dart';
 import 'package:go_router/go_router.dart';
 
 class AddManualExpenseScreen extends ConsumerStatefulWidget {
-  const AddManualExpenseScreen({super.key});
-
+  const AddManualExpenseScreen({super.key, this.expense});
+  final ExpenseModel? expense;
   @override
   ConsumerState<AddManualExpenseScreen> createState() =>
       _AddManualExpenseScreenState();
@@ -20,15 +21,59 @@ class AddManualExpenseScreen extends ConsumerStatefulWidget {
 
 class _AddManualExpenseScreenState
     extends ConsumerState<AddManualExpenseScreen> {
+  bool get isEdit => widget.expense != null;
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _merchantController = TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = 'food';
 
-  final List<Map<String, dynamic>> _items = [];
+  final List<ExpenseItem> _items = [];
+  final List<TextEditingController> _itemNameControllers = [];
+  final List<TextEditingController> _itemAmountControllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (isEdit) {
+      final expense = widget.expense;
+      if (expense == null) return;
+
+      _merchantController.text = expense.merchant;
+      _notesController.text = expense.notes ?? '';
+      _selectedDate = expense.date;
+      _selectedCategory = expense.category;
+      for (final item in expense.items) {
+        _items.add(item);
+        _itemNameControllers.add(TextEditingController(text: item.name));
+        _itemAmountControllers.add(
+          TextEditingController(
+            text: item.amount == 0 ? '' : item.amount.toString(),
+          ),
+        );
+      }
+    }
+  }
+
+  void _updateItem(int index, {String? name, double? amount}) {
+    final item = _items[index];
+    setState(() {
+      _items[index] = ExpenseItem(
+        name: name ?? item.name,
+        amount: amount ?? item.amount,
+      );
+    });
+  }
+
+  void _syncItemFromControllers(int index) {
+    _items[index] = ExpenseItem(
+      name: _itemNameControllers[index].text.trim(),
+      amount: double.tryParse(_itemAmountControllers[index].text) ?? 0.0,
+    );
+  }
 
   Future<void> saveExpense(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -41,51 +86,69 @@ class _AddManualExpenseScreenState
         return;
       }
 
+      for (var i = 0; i < _items.length; i++) {
+        _syncItemFromControllers(i);
+      }
       final amount = _calculatedTotal;
-      final ExpenseModel expenseToAdd = ExpenseModel(
-        id: "",
+      final expense = ExpenseModel(
+        id: isEdit ? widget.expense!.id : '',
         merchant: _merchantController.text.trim(),
         totalAmount: amount,
-        items: _items
-            .map((e) => ExpenseItem(name: e['name'], amount: e['amount']))
-            .toList(),
+        items: _items,
         date: _selectedDate,
         category: _selectedCategory,
         notes: _notesController.text.trim(),
+        receiptImage: widget.expense?.receiptImage,
       );
 
-      ref.read(addExpenseProvider.notifier).addExpense(expenseToAdd);
+      if (isEdit) {
+        ref.read(updateExpenseProvider.notifier).updateExpense(expense);
+      } else {
+        ref.read(addExpenseProvider.notifier).addExpense(expense);
+      }
     }
   }
 
   @override
   void dispose() {
     _merchantController.dispose();
-    _amountController.dispose();
     _notesController.dispose();
+    for (final c in _itemNameControllers) {
+      c.dispose();
+    }
+    for (final c in _itemAmountControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   void _addItem() {
     setState(() {
-      _items.add({'name': '', 'amount': 0.0});
+      _items.add(ExpenseItem(name: '', amount: 0.0));
+      _itemNameControllers.add(TextEditingController());
+      _itemAmountControllers.add(TextEditingController());
     });
   }
 
   void _removeItem(int index) {
     setState(() {
       _items.removeAt(index);
+      _itemNameControllers.removeAt(index).dispose();
+      _itemAmountControllers.removeAt(index).dispose();
     });
   }
 
   double get _calculatedTotal =>
-      _items.fold(0.0, (sum, item) => sum + (item['amount'] as double));
+      _items.fold(0.0, (sum, item) => sum + (item.amount));
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(addExpenseProvider, (previous, next) {
+    void onSaveResult(
+      AsyncValue<dynamic> next, {
+      required String successMessage,
+    }) {
       next.whenOrNull(
-        error: (error, stackTrace) {
+        error: (error, _) {
           showCustomSnackBar(
             context: context,
             message: error.toString(),
@@ -95,7 +158,7 @@ class _AddManualExpenseScreenState
         data: (_) {
           showCustomSnackBar(
             context: context,
-            message: 'Expense saved successfully!',
+            message: successMessage,
             type: SnackBarType.success,
           );
           context
@@ -103,6 +166,13 @@ class _AddManualExpenseScreenState
             ..pop();
         },
       );
+    }
+
+    ref.listen(addExpenseProvider, (previous, next) {
+      onSaveResult(next, successMessage: 'Expense saved successfully!');
+    });
+    ref.listen(updateExpenseProvider, (previous, next) {
+      onSaveResult(next, successMessage: 'Expense updated successfully!');
     });
 
     final isDark = context.isDark;
@@ -248,24 +318,24 @@ class _AddManualExpenseScreenState
                           Expanded(
                             flex: 3,
                             child: AppTextField(
+                              controller: _itemNameControllers[index],
                               labelText: 'Item name',
                               hintText: 'Item name',
-                              onChanged: (v) => _items[index]['name'] = v,
+                              onChanged: (v) => _updateItem(index, name: v),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             flex: 2,
                             child: AppTextField(
+                              controller: _itemAmountControllers[index],
                               labelText: 'Amount',
                               hintText: '0.00',
                               keyboardType: TextInputType.number,
-                              onChanged: (v) {
-                                setState(() {
-                                  _items[index]['amount'] =
-                                      double.tryParse(v) ?? 0.0;
-                                });
-                              },
+                              onChanged: (v) => _updateItem(
+                                index,
+                                amount: double.tryParse(v) ?? 0.0,
+                              ),
                             ),
                           ),
                           IconButton(
