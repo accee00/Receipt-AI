@@ -18,9 +18,11 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
       next.whenOrNull(
         data: (user) {
           if (user != null) {
-            context.go(AppRoutes.home);
+            context.go(
+              user.needsBudgetSetup ? AppRoutes.budget : AppRoutes.home,
+            );
           } else {
-            context.go(AppRoutes.login);
+            context.go(AppRoutes.onboard);
           }
         },
       );

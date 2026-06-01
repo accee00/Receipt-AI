@@ -17,4 +17,5 @@ class AppRoutes {
   static const scanConfirmation = '/scan-confirmation';
   static const aiInsights = '/ai-insights';
   static const expenseDetail = '/expense-detail';
+  static const budget = '/budget';
 }

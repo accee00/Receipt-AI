@@ -82,7 +82,7 @@ const updateUserName = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user._id,
         { name },
-        { new: true }
+        { returnDocument: 'after' }
     ).select("-password");
 
     if (!user) {
@@ -106,7 +106,7 @@ const addBudget = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user._id,
         { budgetLimit: amount },
-        { new: true }
+        { returnDocument: 'after' }
     ).select("-password");
     if (!user) {
         throw new ApiError({ statusCode: 404, message: "User not found" });

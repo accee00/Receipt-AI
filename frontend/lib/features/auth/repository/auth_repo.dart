@@ -84,6 +84,25 @@ class AuthRepo {
     }
   }
 
+  Future<Either<Failure, UserModel>> addBudget({required double amount}) async {
+    try {
+      final ApiResponse<Map<String, dynamic>> response = await dioClient.patch(
+        "users/add-budget",
+        data: {"amount": amount},
+      );
+
+      final data = response.data;
+      if (data != null) {
+        return right(UserModel.fromJson(data));
+      }
+      return left(Failure("Invalid response format"));
+    } on Failure catch (e) {
+      return left(e);
+    } catch (e) {
+      return left(Failure("An unexpected error occurred: ${e.toString()}"));
+    }
+  }
+
   Future<Either<Failure, UserModel>> getCurrentUser() async {
     try {
       final ApiResponse<dynamic> response = await dioClient.get("users/me");

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/routes/app_routes.dart';
+import 'package:frontend/features/auth/view/presentation/budget_screen.dart';
 import 'package:frontend/features/auth/view/presentation/login_screen.dart';
 import 'package:frontend/features/auth/view/presentation/onboard_screen.dart';
 import 'package:frontend/features/auth/view/presentation/signup_screen.dart';
@@ -33,6 +34,10 @@ class GoRoutes {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
+        path: AppRoutes.onboard,
+        builder: (context, state) => const OnboardScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
@@ -41,8 +46,8 @@ class GoRoutes {
         builder: (context, state) => const SignupScreen(),
       ),
       GoRoute(
-        path: AppRoutes.onboard,
-        builder: (context, state) => const OnboardScreen(),
+        path: AppRoutes.budget,
+        builder: (context, state) => const BudgetScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -62,7 +67,6 @@ class GoRoutes {
           return AddManualExpenseScreen();
         },
       ),
-
       GoRoute(
         path: AppRoutes.scanningReceipt,
         builder: (context, state) {

@@ -101,6 +101,29 @@ class DioClient {
     }
   }
 
+  Future<ApiResponse<T>> patch<T>(
+    String url, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    try {
+      final response = await _dio.patch<dynamic>(
+        url,
+        data: data,
+        queryParameters: queryParameters,
+        cancelToken: cancelToken,
+        options: options,
+        onReceiveProgress: onReceiveProgress,
+      );
+      return ApiResponse<T>.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
   Future<ApiResponse<T>> put<T>(
     String url, {
     dynamic data,

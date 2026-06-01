@@ -86,8 +86,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               message: 'Login successful',
               type: SnackBarType.success,
             );
+            context.go(
+              user.needsBudgetSetup ? AppRoutes.budget : AppRoutes.home,
+            );
           }
-          context.go(AppRoutes.home);
         },
       );
     });

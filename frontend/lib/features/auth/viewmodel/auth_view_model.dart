@@ -60,6 +60,10 @@ class AuthViewModel extends _$AuthViewModel {
     );
   }
 
+  void updateUser(UserModel user) {
+    state = AsyncData(user);
+  }
+
   Future<void> getCurrentUser() async {
     state = const AsyncLoading();
     final Either<Failure, UserModel> result = await _authRepo.getCurrentUser();
