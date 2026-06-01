@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/build_extension.dart';
 import 'package:frontend/core/utils/custom_snackbar.dart';
-import 'package:frontend/features/ai-chat/model/chat_model.dart';
+import 'package:frontend/features/ai-chat/view/widget/chat_bubble.dart';
+import 'package:frontend/features/ai-chat/view/widget/typing_indicator.dart';
 import 'package:frontend/features/ai-chat/viewmodel/chat_view_model.dart';
 
 class AiChatScreen extends ConsumerStatefulWidget {
@@ -93,14 +94,14 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                 if (index >= chatState.messages.length) {
                   return const Padding(
                     padding: EdgeInsets.only(top: 8),
-                    child: _TypingIndicator(),
+                    child: TypingIndicator(),
                   );
                 }
 
                 final message = chatState.messages[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _ChatBubble(message: message),
+                  child: ChatBubble(message: message),
                 );
               },
             ),
@@ -168,95 +169,6 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ChatBubble extends StatelessWidget {
-  final ChatMessageModel message;
-
-  const _ChatBubble({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = context.isDark;
-    final isMe = message.isUser;
-
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: EdgeInsets.only(left: isMe ? 40 : 0, right: isMe ? 0 : 40),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isMe
-              ? AppColors.primary
-              : (isDark ? AppColors.darkCard : AppColors.lightCard),
-          borderRadius: BorderRadius.circular(20).copyWith(
-            bottomRight: isMe
-                ? const Radius.circular(4)
-                : const Radius.circular(20),
-            bottomLeft: !isMe
-                ? const Radius.circular(4)
-                : const Radius.circular(20),
-          ),
-          border: isMe
-              ? null
-              : Border.all(
-                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-                ),
-        ),
-        child: Text(
-          message.content,
-          style: TextStyle(
-            color: isMe
-                ? Colors.white
-                : (isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary),
-            height: 1.5,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TypingIndicator extends StatelessWidget {
-  const _TypingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = context.isDark;
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(right: 40),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : AppColors.lightCard,
-          borderRadius: BorderRadius.circular(
-            20,
-          ).copyWith(bottomLeft: const Radius.circular(4)),
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          ),
-        ),
-        child: SizedBox(
-          width: 48,
-          height: 20,
-          child: Center(
-            child: SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.primary.withValues(alpha: 0.8),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
