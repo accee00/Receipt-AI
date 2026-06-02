@@ -18,7 +18,10 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Profile',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
@@ -39,7 +42,7 @@ class ProfileScreen extends ConsumerWidget {
                       image: const DecorationImage(
                         image: NetworkImage('https://i.pravatar.cc/150?img=11'),
                         fit: BoxFit.cover,
-                      )
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -48,13 +51,17 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         Text(
                           user?.name ?? 'User Name',
-                          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           user?.email ?? 'user@example.com',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.lightTextSecondary,
                           ),
                         ),
                       ],
@@ -66,29 +73,39 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 40),
-            
+
             // Settings List
             Container(
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkCard : AppColors.lightCard,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                ),
               ),
               child: Column(
                 children: [
                   _buildListTile(context, Icons.person_outline, 'Edit Profile'),
                   _buildDivider(isDark),
-                  _buildListTile(context, Icons.notifications_outlined, 'Notifications'),
+                  _buildListTile(
+                    context,
+                    Icons.notifications_outlined,
+                    'Notifications',
+                  ),
                   _buildDivider(isDark),
-                  _buildListTile(context, Icons.lock_outline, 'Privacy & Security'),
+                  _buildListTile(
+                    context,
+                    Icons.lock_outline,
+                    'Privacy & Security',
+                  ),
                   _buildDivider(isDark),
                   _buildListTile(context, Icons.help_outline, 'Help & Support'),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Logout Button
             SizedBox(
               width: double.infinity,
@@ -102,8 +119,12 @@ class ProfileScreen extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.logout, color: AppColors.error),
                 label: const Text(
-                  'Log Out', 
-                  style: TextStyle(color: AppColors.error, fontSize: 16, fontWeight: FontWeight.bold)
+                  'Log Out',
+                  style: TextStyle(
+                    color: AppColors.error,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppColors.error),
@@ -122,25 +143,27 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildListTile(BuildContext context, IconData icon, String title) {
     final isDark = context.isDark;
-    
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
+
+    return Material(
+      child: ListTile(
+        splashColor: Colors.transparent,
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: AppColors.primary),
         ),
-        child: Icon(icon, color: AppColors.primary),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: isDark
+              ? AppColors.darkTextSecondary
+              : AppColors.lightTextSecondary,
+        ),
+        onTap: () {},
       ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-      ),
-      onTap: () {},
     );
   }
 

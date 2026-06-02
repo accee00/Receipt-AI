@@ -13,7 +13,7 @@ const getProfile = asyncHandler((req, res) => {
     );
 });
 
-const updateProfile = asyncHandler(async (req, res) => {
+const updateUserName = asyncHandler(async (req, res) => {
     const { name } = req.body;
     if (!name?.trim()) {
         throw new ApiError({
@@ -43,4 +43,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     );
 });
 
-export { getProfile, updateProfile };
+const updatePassword = asyncHandler(async (req, res) => {
+
+});
+export { getProfile, updateUserName };
